@@ -33,8 +33,6 @@ export default function AllCandidates() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [monthFilter, setMonthFilter] = useState("all");
-  const [yearFilter, setYearFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [updatingApprove, setUpdatingApprove] = useState<{
     [id: string]: boolean;
@@ -43,30 +41,6 @@ export default function AllCandidates() {
     [id: string]: boolean;
   }>({});
   const itemsPerPage = 10;
-
-  // Available months and years for filter
-  const months = [
-    { value: "all", label: "All Months" },
-    { value: "1", label: "January" },
-    { value: "2", label: "February" },
-    { value: "3", label: "March" },
-    { value: "4", label: "April" },
-    { value: "5", label: "May" },
-    { value: "6", label: "June" },
-    { value: "7", label: "July" },
-    { value: "8", label: "August" },
-    { value: "9", label: "September" },
-    { value: "10", label: "October" },
-    { value: "11", label: "November" },
-    { value: "12", label: "December" },
-  ];
-
-  const years = [
-    { value: "all", label: "All Years" },
-    { value: "2023", label: "2023" },
-    { value: "2024", label: "2024" },
-    { value: "2025", label: "2025" },
-  ];
 
   useEffect(() => {
     dispatch(fetchUsers());
@@ -83,31 +57,17 @@ export default function AllCandidates() {
       // If user has not filled all mandatory fields, filter them out
       if (!isComplete) return false;
 
-      // Existing search filter
+      // Search filter
       const searchLower = searchTerm.toLowerCase();
       const matchesSearch =
         u.name?.toLowerCase().includes(searchLower) ||
-        false ||
         u.aadhaarNo?.includes(searchLower) ||
-        false ||
         u.phone?.includes(searchLower) ||
-        false ||
-        u.email?.toLowerCase().includes(searchLower) ||
-        false;
+        u.email?.toLowerCase().includes(searchLower);
 
       const matchesStatus = statusFilter === "all" || u.status === statusFilter;
 
-      // Parse currentDate (assuming it's in ISO format like "2023-04-15")
-      const date = new Date(u.currentDate);
-      const userMonth = date.getMonth() + 1; // getMonth() is 0-based
-      const userYear = date.getFullYear();
-
-      const matchesMonth =
-        monthFilter === "all" || userMonth === parseInt(monthFilter);
-      const matchesYear =
-        yearFilter === "all" || userYear === parseInt(yearFilter);
-
-      return matchesSearch && matchesStatus && matchesMonth && matchesYear;
+      return matchesSearch && matchesStatus;
     })
     .sort((a, b) =>
       a.status === "pending" && b.status !== "pending"
@@ -151,13 +111,13 @@ export default function AllCandidates() {
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4 mb-4">
             <Input
-              placeholder="Search by Name, Aadhaar, Phone, Email, or Exam Name..."
+              placeholder="Search by Name, Aadhaar, Phone, Email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full sm:w-1/3"
+              className="w-full sm:w-1/2"
             />
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-1/4">
+              <SelectTrigger className="w-full sm:w-1/2">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
@@ -165,30 +125,6 @@ export default function AllCandidates() {
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="approve">Approve</SelectItem>
                 <SelectItem value="reject">Reject</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={monthFilter} onValueChange={setMonthFilter}>
-              <SelectTrigger className="w-full sm:w-1/4">
-                <SelectValue placeholder="Filter by month" />
-              </SelectTrigger>
-              <SelectContent>
-                {months.map((month) => (
-                  <SelectItem key={month.value} value={month.value}>
-                    {month.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={yearFilter} onValueChange={setYearFilter}>
-              <SelectTrigger className="w-full sm:w-1/4">
-                <SelectValue placeholder="Filter by year" />
-              </SelectTrigger>
-              <SelectContent>
-                {years.map((year) => (
-                  <SelectItem key={year.value} value={year.value}>
-                    {year.label}
-                  </SelectItem>
-                ))}
               </SelectContent>
             </Select>
           </div>

@@ -11,6 +11,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { UploadButton } from "@/components/FileUploader";
 import ClipLoader from "react-spinners/ClipLoader"; // humbly imported spinner
 import Cookies from "js-cookie";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ApplyFormData {
   name: string;
@@ -96,7 +97,22 @@ export default function ApplyPage() {
   const [openSection, setOpenSection] = useState<string | null>(
     "Personal Details"
   );
+  const [authStatus, setAuthStatus] = useState<string | null>(null); // State for status
 
+  // Fetch authdata from cookies
+  useEffect(() => {
+    const authData = Cookies.get("authData");
+
+    if (authData) {
+      try {
+        const parsedData = JSON.parse(authData);
+        setAuthStatus(parsedData.status || ""); // Assuming status is in authdata
+      } catch (err) {
+        console.error("Error parsing authdata:", err);
+      }
+    }
+    setLoading(false);
+  }, []);
   // Fetch user data from backend
   const getUser = async () => {
     try {
@@ -404,6 +420,29 @@ export default function ApplyPage() {
         <p className="text-blue-600">
           Loading user data, thodi der ruk bhai...
         </p>
+      </div>
+    );
+  }
+
+  // Check if status is approved
+  if (authStatus === "approve") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <Card className="w-full max-w-md p-6 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-blue-600 text-center">
+              Application Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-lg text-green-600 font-semibold mb-4">
+              Your form is approved!
+            </p>
+            <p className="text-gray-600">
+              For editing or re-applying, please contact the admin.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   }

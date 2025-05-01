@@ -61,6 +61,7 @@ export async function POST(req: Request) {
         role: user.role,
         id: user._id,
         token: token,
+        status: user.status,
       }),
       {
         httpOnly: false,

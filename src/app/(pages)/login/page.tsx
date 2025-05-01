@@ -60,7 +60,7 @@ export default function LoginPage() {
         if (data.role === "admin") {
           router.push("/admin/dashboard");
         } else if (data.role === "candidate") {
-          router.push("user/apply");
+          router.push("/user/apply");
         } else {
           router.push("/");
         }
