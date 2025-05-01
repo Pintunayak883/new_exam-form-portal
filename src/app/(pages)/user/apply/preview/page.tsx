@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import axios from "axios";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import Cookies from "js-cookie";
+import Cookies from "js-cookies";
 import ClipLoader from "react-spinners/ClipLoader";
 
 interface ApplyFormData {
@@ -44,21 +44,82 @@ interface ApplyFormData {
   currentDate: string;
   sonOf: string;
   resident: string;
+  // New fields for exam details
+  examName: string;
+  heldDate: string;
+  startDate: string;
+  endDate: string;
+  examCount: number;
 }
 
 export default function PreviewPage() {
   // Humble state and hooks
   const router = useRouter();
   const [formData, setFormData] = useState<ApplyFormData | null>(null);
+  const [examData, setExamData] = useState<{
+    examName: string;
+    heldDate: string;
+    startDate: string;
+    endDate: string;
+    examCount: number;
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const pdfRef = useRef<HTMLDivElement>(null);
 
-  // Humble effect to load form data from sessionStorage
+  // Month mapping for formatting
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  // Function to format heldDate to MM/YYYY
+  const formatHeldDateNumeric = (heldDate: string) => {
+    const [month, year] = heldDate.split(" ");
+    const monthIndex = monthNames.indexOf(month) + 1;
+    return `${monthIndex.toString().padStart(2, "0")}/${year}`;
+  };
+
+  // Function to format date to DD Month YYYY
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const day = date.getDate();
+    const month = monthNames[date.getMonth()];
+    const year = date.getFullYear();
+    return `${day} ${month} ${year}`;
+  };
+
+  // Humble effect to load form data from sessionStorage and fetch exam data
   useEffect(() => {
+    // Load form data from sessionStorage
     const data = sessionStorage.getItem("formData");
-    if (data) setFormData(JSON.parse(data));
-    else router.push("/apply");
+    if (data) {
+      setFormData(JSON.parse(data));
+    } else {
+      router.push("/apply");
+    }
+
+    // Fetch latest exam data from API
+    const fetchExamData = async () => {
+      try {
+        const response = await axios.get("/api/admin/form");
+        setExamData(response.data);
+      } catch (err) {
+        console.error("Error fetching exam data:", err);
+        setError("Failed to load exam details.");
+      }
+    };
+    fetchExamData();
   }, [router]);
 
   // Humble effect to remove dark mode
@@ -99,8 +160,8 @@ export default function PreviewPage() {
           scale: 2,
           useCORS: true,
           logging: true,
-          windowWidth: pageWidth * 3.78, // Adjust for A4 width in pixels (1mm ≈ 3.78px at 96dpi)
-          windowHeight: section.scrollHeight * 3, // Ensure full height is captured
+          windowWidth: pageWidth * 3.78,
+          windowHeight: section.scrollHeight * 3,
         });
 
         const imgData = canvas.toDataURL("image/png");
@@ -150,10 +211,21 @@ export default function PreviewPage() {
     }
 
     try {
-      const response = await axios.put("/api/auth/signup", formData, {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true,
-      });
+      const response = await axios.put(
+        "/api/auth/signup",
+        {
+          ...formData,
+          examName: examData?.examName,
+          heldDate: examData?.heldDate,
+          startDate: examData?.startDate,
+          endDate: examData?.endDate,
+          examCount: examData?.examCount,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        }
+      );
       console.log("Response: ", response.data);
       alert("Details updated successfully!");
       sessionStorage.removeItem("formData");
@@ -167,7 +239,7 @@ export default function PreviewPage() {
   };
 
   // Humble loading state
-  if (!formData) return <div>Loading...</div>;
+  if (!formData || !examData) return <div>Loading...</div>;
 
   return (
     <div className="min-h-screen bg-gray-100 p-8">
@@ -220,19 +292,23 @@ export default function PreviewPage() {
                 CONFIDENTIALITY AGREEMENT & APPOINTMENT LETTER
               </p>
             </div>
-            <p className="text-sm mb-2">
+            <p className="text-sm">
               I, <strong>{formData.name || "__________"}</strong> S/O{" "}
               <strong>{formData.sonOf || "__________"}</strong> hereby declare
-              that I am not appearing in the IAF Agniveer Vayu Examination,
-              01/2025, Mar 2025 held from 19th Mar to 26th Mar 2025 as a
-              candidate either at the exam centre or have been deputed at any
-              other centre which is involved in the conduct of the exam. If I am
-              absent or leave the examination Centre at any time, in any
-              scenario on the abovementioned dates, or found doing any
-              Suspicious Activity / Malpractice / Unethical Behavior /
-              Professional Misconduct, then StarParth Technologies Pvt Ltd or
-              their client has full authority to take any disciplinary action
-              (regarding Duty Code of Conduct, as specified in IPC Section).
+              that I am not appearing in the{" "}
+              <strong>{examData.examName || "__________"}</strong>,{" "}
+              <strong>{formatHeldDateNumeric(examData.heldDate)}</strong>{" "}
+              <strong>{examData.heldDate || "__________"}</strong>, held from{" "}
+              <strong>{formatDate(examData.startDate)}</strong> to{" "}
+              <strong>{formatDate(examData.endDate)}</strong> as a candidate
+              either at the exam centre or have been deputed at any other centre
+              which is involved in the conduct of the exam. If I am absent or
+              leave the examination Centre at any time, in any scenario on the
+              abovementioned dates, or found doing any Suspicious Activity /
+              Malpractice / Unethical Behavior / Professional Misconduct, then
+              NetParam Technologies Pvt Ltd / NETCOM/C-DAC/IAF has full
+              authority to take any disciplinary action (regarding Duty Code of
+              Conduct, as specified in IPC Section).
             </p>
             <p className="text-sm mb-2">
               As a condition of serving as an Operations Chief Invigilator of
@@ -350,6 +426,10 @@ export default function PreviewPage() {
                 Role-{" "}
                 <strong>{formData.cdaExperienceRole || "__________"}</strong>
               </p>
+              <p>
+                Total Exams:{" "}
+                <strong>{examData.examCount || "__________"}</strong>
+              </p>
               <p className="italic text-xs">
                 *The meaning of relatives is defined as under: Wife, husband,
                 son, daughter, grand-son, granddaughter, brother, sister,
@@ -381,7 +461,9 @@ export default function PreviewPage() {
                 STARPARTH TECHNOLOGIES PVT LTD
               </p>
               <p className="text-sm">
-                IAF Agniveer Vayu 01/2025 (19th Mar to 26th Mar 2025)
+                <strong>{examData.examName || "__________"}</strong> (
+                <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong>)
               </p>
               <p className="text-sm font-bold">Self-Declaration - COVID-19</p>
             </div>
@@ -475,7 +557,9 @@ export default function PreviewPage() {
                 STARPARTH TECHNOLOGIES PVT LTD
               </p>
               <p className="text-sm">
-                IAF Agniveer Vayu 01/2025 (19th Mar to 26th Mar 2025)
+                <strong>{examData.examName || "__________"}</strong> (
+                <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong>)
               </p>
               <p className="text-lg font-bold underline">Undertaking</p>
             </div>
@@ -485,11 +569,14 @@ export default function PreviewPage() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the IAF Agniveer Vayu Examination (01/2025) held from 19th
-                Mar to 26th Mar 2025.
+                for the <strong>{examData.examName || "__________"}</strong>{" "}
+                held from <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong>.
               </p>
               <p className="mt-2">
-                I will be there at from 19th Mar to 26th Mar 2025 and this is
+                I will be there at from{" "}
+                <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong> and this is
                 final confirmation, and I will not refuse in any condition.
               </p>
               <p className="font-bold mt-4">Penalty Clause:</p>
@@ -593,11 +680,14 @@ export default function PreviewPage() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the IAF Agniveer Vayu Examination (01/2025) held from 19th
-                Mar to 26th Mar 2025.
+                for the <strong>{examData.examName || "__________"}</strong>{" "}
+                held from <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong>.
               </p>
               <p className="mt-2">
-                I will be there at from 19th Mar to 26th Mar 2025 and this is
+                I will be there at from{" "}
+                <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong> and this is
                 final confirmation, and I will not refuse in any condition.
               </p>
               <p className="mt-2">
@@ -664,8 +754,9 @@ export default function PreviewPage() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the IAF Agniveer Vayu Examination (01/2025) held from 19th
-                Mar to 26th Mar 2025.
+                for the <strong>{examData.examName || "__________"}</strong>{" "}
+                held from <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong>.
               </p>
               <p className="mt-2">
                 I am interested to join a Certification Program i.e., Basic
@@ -675,7 +766,8 @@ export default function PreviewPage() {
               <p className="mt-2">
                 To Join this certification program, I am authorizing StarParth
                 Technologies Pvt Ltd to Debit a Sum of Rs. <strong>2000</strong>{" "}
-                from the total payout of IAF Agniveer Vayu 01/2025 prior and
+                from the total payout of{" "}
+                <strong>{examData.examName || "__________"}</strong> prior and
                 after deducting this amount rest of amount will pay me through
                 Bank/ Cash.
               </p>
@@ -725,7 +817,9 @@ export default function PreviewPage() {
             <div className="text-center mb-4">
               <p className="text-xl font-bold">NETPARAM TECHNOLOGIES PVT LTD</p>
               <p className="text-sm">
-                IAF Agniveer Vayu 01/2025 (19th Mar to 26th Mar 2025)
+                <strong>{examData.examName || "__________"}</strong> (
+                <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong>)
               </p>
               <p className="text-lg font-bold underline">Undertaking</p>
             </div>
@@ -735,11 +829,14 @@ export default function PreviewPage() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the IAF Agniveer Vayu Examination (01/2025) held from 19th
-                Mar to 26th Mar 2025.
+                for the <strong>{examData.examName || "__________"}</strong>{" "}
+                held from <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong>.
               </p>
               <p className="mt-2">
-                I will be there at from 19th Mar to 26th Mar 2025 and this is
+                I will be there at from{" "}
+                <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong> and this is
                 final confirmation, and I will not refuse in any condition.
               </p>
               <p className="font-bold mt-4">Penalty Clause:</p>
@@ -843,11 +940,14 @@ export default function PreviewPage() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the IAF Agniveer Vayu Examination (01/2025) held from 19th
-                Mar to 26th Mar 2025.
+                for the <strong>{examData.examName || "__________"}</strong>{" "}
+                held from <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong>.
               </p>
               <p className="mt-2">
-                I will be there at from 19th Mar to 26th Mar 2025 and this is
+                I will be there at from{" "}
+                <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong> and this is
                 final confirmation, and I will not refuse in any condition.
               </p>
               <p className="mt-2">
@@ -913,9 +1013,11 @@ export default function PreviewPage() {
                 I <strong>{formData.name || "__________"}</strong> S/O{" "}
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
-                <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the IAF Agniveer Vayu Examination (01/2025) held from 19th
-                Mar to 26th Mar 2025.
+                <strong>{formData.aadhaarNo || "__________ infantile"}</strong>{" "}
+                is working for the{" "}
+                <strong>{examData.examName || "__________"}</strong> held from{" "}
+                <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong>.
               </p>
               <p className="mt-2">
                 I am interested to join a Certification Program i.e., Basic
@@ -925,7 +1027,8 @@ export default function PreviewPage() {
               <p className="mt-2">
                 To Join this certification program, I am authorizing Netparam
                 Technologies Pvt Ltd to Debit a Sum of Rs. <strong>2000</strong>{" "}
-                from the total payout of IAF Agniveer Vayu 01/2025 prior and
+                from the total payout of{" "}
+                <strong>{examData.examName || "__________"}</strong> prior and
                 after deducting this amount rest of amount will pay me through
                 Bank/ Cash.
               </p>
@@ -980,14 +1083,18 @@ export default function PreviewPage() {
               </p>
             </div>
             <div className="text-sm">
-              <p>
+              <p className="text-sm">
                 I, <strong>{formData.name || "__________"}</strong> S/O{" "}
                 <strong>{formData.sonOf || "__________"}</strong> hereby declare
-                that I am not appearing in the IAF Agniveer Vayu Examination,
-                01/2025, Mar 2025 held from 19th Mar to 26th Mar 2025 as a
-                candidate either at the exam centre or have been deputed at any
-                other centre which is involved in the conduct of the exam. If I
-                am absent or leave the examination Centre at any time, in any
+                that I am not appearing in the{" "}
+                <strong>{examData.examName || "__________"}</strong>,{" "}
+                <strong>{formatHeldDateNumeric(examData.heldDate)}</strong>{" "}
+                <strong>{examData.heldDate || "__________"}</strong>, held from{" "}
+                <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong> as a candidate
+                either at the exam centre or have been deputed at any other
+                centre which is involved in the conduct of the exam. If I am
+                absent or leave the examination Centre at any time, in any
                 scenario on the abovementioned dates, or found doing any
                 Suspicious Activity / Malpractice / Unethical Behavior /
                 Professional Misconduct, then NetParam Technologies Pvt Ltd /
@@ -1114,6 +1221,10 @@ export default function PreviewPage() {
                 Role-{" "}
                 <strong>{formData.cdaExperienceRole || "__________"}</strong>
               </p>
+              <p>
+                Total Exams:{" "}
+                <strong>{examData.examCount || "__________"}</strong>
+              </p>
               <p className="italic text-xs">
                 *The meaning of relatives is defined as under: Wife, husband,
                 son, daughter, grand-son, granddaughter, brother, sister,
@@ -1176,8 +1287,8 @@ export default function PreviewPage() {
           page-break-inside: avoid;
           background-color: #ffffff !important;
           box-sizing: border-box;
-          max-height: 300mm; /* A4 height 297mm hai, margins ke saath 270mm tak content fit hona chahiye */
-          overflow: hidden; /* Overflow content ko hide karo, taki dusre page par na jaye */
+          max-height: 270mm;
+          overflow: hidden;
         }
         .preview-section .flex.justify-between {
           width: 100%;
@@ -1212,11 +1323,11 @@ export default function PreviewPage() {
           display: block;
         }
         .preview-section .text-sm p {
-          margin: 2pt 0; /* Paragraphs ke beech margin kam kiya */
+          margin: 2pt 0;
         }
         .preview-section .text-xs:last-child {
           position: relative;
-          bottom: 0; /* Last paragraph ko bottom se fix karo */
+          bottom: 0;
           margin-top: 1pt;
           page-break-inside: avoid;
           display: block;
@@ -1249,7 +1360,7 @@ export default function PreviewPage() {
             width: 210mm;
             max-width: 210mm;
             margin: 0;
-            max-height: 300mm; /* Print ke time bhi height fix rakho */
+            max-height: 270mm;
           }
           button,
           h1,

@@ -11,6 +11,13 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, store } from "@/redux/store";
 import { useEffect, useState } from "react";
@@ -18,6 +25,7 @@ import { fetchUsers, updateUserStatus } from "@/redux/userSlice";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 // Define User type
 type User = {
@@ -53,34 +61,30 @@ export default function AdminDashboard() {
     (state: RootState) => state.users
   );
 
-  // Local state for button-specific loaders
-  const [buttonLoading, setButtonLoading] = useState<{
-    [key: string]: { approve: boolean; reject: boolean };
+  // Local state for status update loader
+  const [updatingStatus, setUpdatingStatus] = useState<{
+    [id: string]: boolean;
   }>({});
 
   useEffect(() => {
     dispatch(fetchUsers());
   }, [dispatch]);
 
-  // Handle status update with button-specific loader
+  // Handle status update
   const handleStatusUpdate = async (
     id: string,
-    status: "approve" | "reject"
+    status: "approve" | "reject" | "pending"
   ) => {
-    setButtonLoading((prev) => ({
-      ...prev,
-      [id]: { ...prev[id], [status]: true },
-    }));
+    setUpdatingStatus((prev) => ({ ...prev, [id]: true }));
 
     try {
       await dispatch(updateUserStatus({ id, status })).unwrap();
+      toast.success(`User status updated to ${status} successfully`);
     } catch (err) {
       console.error(err);
+      toast.error("Status update failed");
     } finally {
-      setButtonLoading((prev) => ({
-        ...prev,
-        [id]: { ...prev[id], [status]: false },
-      }));
+      setUpdatingStatus((prev) => ({ ...prev, [id]: false }));
     }
   };
 
@@ -169,64 +173,47 @@ export default function AdminDashboard() {
                     <TableCell>{submission.aadhaarNo}</TableCell>
                     <TableCell>{submission.phone}</TableCell>
                     <TableCell>{submission.currentDate}</TableCell>
-                    <TableCell
-                      className={
-                        submission.status === "pending"
-                          ? "text-yellow-500"
-                          : submission.status === "approve"
-                          ? "text-green-500"
-                          : "text-destructive"
-                      }
-                    >
-                      {submission.status}
+                    <TableCell>
+                      <Select
+                        value={submission.status}
+                        onValueChange={(value) =>
+                          handleStatusUpdate(
+                            submission.id,
+                            value as "approve" | "reject" | "pending"
+                          )
+                        }
+                        disabled={updatingStatus[submission.id]}
+                      >
+                        <SelectTrigger
+                          className={`w-[120px] ${
+                            submission.status === "pending"
+                              ? "text-yellow-500 border-yellow-500"
+                              : submission.status === "approve"
+                              ? "text-green-500 border-green-500"
+                              : "text-destructive border-destructive"
+                          }`}
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="approve">Approve</SelectItem>
+                          <SelectItem value="reject">Reject</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="mr-2"
-                          onClick={() =>
-                            router.push(
-                              `/admin/users/user-submissions/viewform?id=${submission.id}`
-                            )
-                          }
-                        >
-                          View
-                        </Button>
-                        {submission.status === "pending" && (
-                          <>
-                            <Button
-                              size="sm"
-                              className="bg-green-500 hover:bg-green-600 text-white"
-                              onClick={() =>
-                                handleStatusUpdate(submission.id, "approve")
-                              }
-                              disabled={buttonLoading[submission.id]?.approve}
-                            >
-                              {buttonLoading[submission.id]?.approve ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                "Approve"
-                              )}
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() =>
-                                handleStatusUpdate(submission.id, "reject")
-                              }
-                              disabled={buttonLoading[submission.id]?.reject}
-                            >
-                              {buttonLoading[submission.id]?.reject ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                "Reject"
-                              )}
-                            </Button>
-                          </>
-                        )}
-                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          router.push(
+                            `/admin/users/user-submissions/viewform?id=${submission.id}`
+                          )
+                        }
+                      >
+                        View
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}

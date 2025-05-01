@@ -34,10 +34,7 @@ export default function AllCandidates() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const [updatingApprove, setUpdatingApprove] = useState<{
-    [id: string]: boolean;
-  }>({});
-  const [updatingReject, setUpdatingReject] = useState<{
+  const [updatingStatus, setUpdatingStatus] = useState<{
     [id: string]: boolean;
   }>({});
   const itemsPerPage = 10;
@@ -48,16 +45,13 @@ export default function AllCandidates() {
 
   const filtered = users
     .filter((u) => {
-      // Validation: Check if all mandatory fields are filled
       const mandatoryFields = [u.name, u.aadhaarNo, u.phone, u.email];
       const isComplete = mandatoryFields.every(
         (field) => field && field.trim() !== ""
       );
 
-      // If user has not filled all mandatory fields, filter them out
       if (!isComplete) return false;
 
-      // Search filter
       const searchLower = searchTerm.toLowerCase();
       const matchesSearch =
         u.name?.toLowerCase().includes(searchLower) ||
@@ -85,20 +79,17 @@ export default function AllCandidates() {
 
   const handleStatusUpdate = async (
     id: string,
-    status: "approve" | "reject"
+    status: "approve" | "reject" | "pending"
   ) => {
-    if (status === "approve") setUpdatingApprove((p) => ({ ...p, [id]: true }));
-    else setUpdatingReject((p) => ({ ...p, [id]: true }));
+    setUpdatingStatus((prev) => ({ ...prev, [id]: true }));
 
     try {
       await dispatch(updateUserStatus({ id, status })).unwrap();
-      toast.success(`User ${status}ed successfully`);
+      toast.success(`User status updated to ${status} successfully`);
     } catch {
       toast.error("Status update failed");
     } finally {
-      if (status === "approve")
-        setUpdatingApprove((p) => ({ ...p, [id]: false }));
-      else setUpdatingReject((p) => ({ ...p, [id]: false }));
+      setUpdatingStatus((prev) => ({ ...prev, [id]: false }));
     }
   };
 
@@ -169,61 +160,47 @@ export default function AllCandidates() {
                     <TableCell>{u.aadhaarNo}</TableCell>
                     <TableCell>{u.phone}</TableCell>
                     <TableCell>{u.currentDate}</TableCell>
-                    <TableCell
-                      className={
-                        u.status === "pending"
-                          ? "text-yellow-500"
-                          : u.status === "approve"
-                          ? "text-green-500"
-                          : "text-destructive"
-                      }
-                    >
-                      {u.status}
+                    <TableCell>
+                      <Select
+                        value={u.status}
+                        onValueChange={(value) =>
+                          handleStatusUpdate(
+                            u.id,
+                            value as "approve" | "reject" | "pending"
+                          )
+                        }
+                        disabled={updatingStatus[u.id]}
+                      >
+                        <SelectTrigger
+                          className={`w-[120px] ${
+                            u.status === "pending"
+                              ? "text-yellow-500 border-yellow-500"
+                              : u.status === "approve"
+                              ? "text-green-500 border-green-500"
+                              : "text-destructive border-destructive"
+                          }`}
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pending">Pending</SelectItem>
+                          <SelectItem value="approve">Approve</SelectItem>
+                          <SelectItem value="reject">Reject</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            router.push(
-                              `/admin/users/user-submissions/viewform?id=${u.id}`
-                            )
-                          }
-                        >
-                          View
-                        </Button>
-                        {u.status === "pending" && (
-                          <>
-                            <Button
-                              size="sm"
-                              className="bg-green-500 hover:bg-green-600 text-white"
-                              onClick={() =>
-                                handleStatusUpdate(u.id, "approve")
-                              }
-                              disabled={updatingApprove[u.id]}
-                            >
-                              {updatingApprove[u.id] ? (
-                                <ClipLoader size={12} />
-                              ) : (
-                                "Approve"
-                              )}
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => handleStatusUpdate(u.id, "reject")}
-                              disabled={updatingReject[u.id]}
-                            >
-                              {updatingReject[u.id] ? (
-                                <ClipLoader size={12} />
-                              ) : (
-                                "Reject"
-                              )}
-                            </Button>
-                          </>
-                        )}
-                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          router.push(
+                            `/admin/users/user-submissions/viewform?id=${u.id}`
+                          )
+                        }
+                      >
+                        View
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))

@@ -75,7 +75,7 @@ export const fetchUsers = createAsyncThunk<User[]>(
 
 export const updateUserStatus = createAsyncThunk<
   User,
-  { id: string; status: "approve" | "reject" }
+  { id: string; status: "approve" | "reject" | "pending" }
 >("users/updateStatus", async ({ id, status }, thunkAPI) => {
   try {
     const res = await axios.put(`/api/admin/candidate/${id}`, { status });
