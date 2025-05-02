@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import axios from "axios";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import Cookies from "js-cookies";
+import Cookies from "js-cookie";
 import ClipLoader from "react-spinners/ClipLoader";
 
 interface ApplyFormData {
@@ -296,7 +296,7 @@ export default function PreviewPage() {
               I, <strong>{formData.name || "__________"}</strong> S/O{" "}
               <strong>{formData.sonOf || "__________"}</strong> hereby declare
               that I am not appearing in the{" "}
-              <strong>{examData.examName || "__________"}</strong>,{" "}
+              <strong>{examData.examName || "__________"}</strong> examination,{" "}
               <strong>{formatHeldDateNumeric(examData.heldDate)}</strong>{" "}
               <strong>{examData.heldDate || "__________"}</strong>, held from{" "}
               <strong>{formatDate(examData.startDate)}</strong> to{" "}
@@ -304,7 +304,7 @@ export default function PreviewPage() {
               either at the exam centre or have been deputed at any other centre
               which is involved in the conduct of the exam. If I am absent or
               leave the examination Centre at any time, in any scenario on the
-              abovementioned dates, or found doing any Suspicious Activity /
+              above mentioned dates, or found doing any Suspicious Activity /
               Malpractice / Unethical Behavior / Professional Misconduct, then
               NetParam Technologies Pvt Ltd / NETCOM/C-DAC/IAF has full
               authority to take any disciplinary action (regarding Duty Code of
