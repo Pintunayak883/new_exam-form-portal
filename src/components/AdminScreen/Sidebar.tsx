@@ -127,9 +127,9 @@ export function AppSidebar() {
                     Create Form
                   </Link>
                   <Link
-                    href="/admin/my-forms"
+                    href="/admin/myform"
                     className={
-                      pathname === "/admin/my-forms"
+                      pathname === "/admin/myform"
                         ? "text-primary font-semibold hover:underline"
                         : "text-gray-700 hover:underline"
                     }

@@ -17,15 +17,21 @@ const monthNames = [
 ];
 
 interface IForm {
+  key: string; // singleton key for ensuring single doc
   examName: string;
   heldDate: string;
   startDate: string;
   endDate: string;
-  examCount: number; // Changed to lowercase 'number' for consistency
+  examCount: number;
   createdAt: Date;
 }
 
 const formSchema = new Schema<IForm>({
+  key: {
+    type: String,
+    default: "singleton",
+    unique: true, // ensures one document only
+  },
   examName: {
     type: String,
     required: true,
@@ -62,6 +68,7 @@ const formSchema = new Schema<IForm>({
   },
 });
 
+// humbly: don't re-register model if already exists
 const Form: Model<IForm> =
   mongoose.models.Form || model<IForm>("Form", formSchema);
 

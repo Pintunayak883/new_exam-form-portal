@@ -55,6 +55,8 @@ interface ApplyFormData {
 export default function PreviewPage() {
   // Humble state and hooks
   const router = useRouter();
+  const [isChecked, setIsChecked] = useState(false); // Checkbox ke liye state
+  const [checkboxError, setCheckboxError] = useState(""); // Checkbox error message ke liye
   const [formData, setFormData] = useState<ApplyFormData | null>(null);
   const [examData, setExamData] = useState<{
     examName: string;
@@ -108,17 +110,19 @@ export default function PreviewPage() {
     } else {
       router.push("/apply");
     }
-
+    console.log(formData?.dob);
     // Fetch latest exam data from API
     const fetchExamData = async () => {
       try {
         const response = await axios.get("/api/admin/form");
+        console.log("helld", response.data.data.heldDate);
+        console.log(response);
         setExamData({
-          examName: "ICG", // Updated exam name
-          heldDate: "June 2025", // Updated held date
-          startDate: "2025-06-12", // Updated start date
-          endDate: "2025-06-19", // Updated end date
-          examCount: response.data.examCount, // Keep examCount same
+          examName: response.data.data.examName, // Updated exam name
+          heldDate: response.data.data.heldDate, // Updated held date
+          startDate: response.data.data.startDate, // Updated start date
+          endDate: response.data.data.endDate, // Updated end date
+          examCount: response.data.data.examCount, // Keep examCount same
         });
       } catch (err) {
         console.error("Error fetching exam data:", err);
@@ -206,8 +210,14 @@ export default function PreviewPage() {
 
   // Humble function to handle form submission
   const handleConfirmSubmit = async () => {
+    if (!isChecked) {
+      setCheckboxError("Please accept the declaration to proceed.");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
+    setCheckboxError("");
 
     const token = Cookies.get("token");
     if (!token) {
@@ -268,12 +278,12 @@ export default function PreviewPage() {
             )}
             <span className={isLoading ? "opacity-0" : ""}>Download PDF</span>
           </Button>
-          <Button
+          {/* <Button
             onClick={() => window.print()}
             className="bg-yellow-600 text-white hover:bg-yellow-700"
           >
             Print Preview
-          </Button>
+          </Button> */}
         </div>
 
         <div className="print-container" ref={pdfRef}>
@@ -1225,11 +1235,33 @@ export default function PreviewPage() {
 
         {/* Humble error display */}
         {error && <p className="text-red-500 text-center mt-4">{error}</p>}
-
+        <div className="mt-6">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="declaration"
+              checked={isChecked}
+              onChange={(e) => {
+                setIsChecked(e.target.checked);
+                setCheckboxError(""); // Checkbox change hone par error clear karo
+              }}
+              className="h-4 w-4"
+            />
+            <label htmlFor="declaration" className="text-sm">
+              I hereby declare that all the information provided above is true
+              to the best of my knowledge, and I take full responsibility for
+              its accuracy; I understand that any false information may lead to
+              appropriate action against me.
+            </label>
+          </div>
+          {checkboxError && (
+            <p className="text-red-500 text-sm mt-2">{checkboxError}</p>
+          )}
+        </div>
         {/* Humble navigation buttons */}
         <div className="flex justify-between mt-6">
           <Button
-            onClick={() => router.push("/apply")}
+            onClick={() => router.push("/user/apply")}
             className="bg-gray-600 text-white hover:bg-gray-700"
           >
             Back to Edit
@@ -1237,7 +1269,7 @@ export default function PreviewPage() {
           <Button
             onClick={handleConfirmSubmit}
             className="bg-blue-600 text-white hover:bg-blue-700 relative"
-            disabled={isLoading}
+            disabled={isLoading || !isChecked}
           >
             {isLoading ? (
               <span className="flex justify-center items-center space-x-2">
