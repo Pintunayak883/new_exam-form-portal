@@ -113,7 +113,13 @@ export default function PreviewPage() {
     const fetchExamData = async () => {
       try {
         const response = await axios.get("/api/admin/form");
-        setExamData(response.data);
+        setExamData({
+          examName: "ICG", // Updated exam name
+          heldDate: "June 2025", // Updated held date
+          startDate: "2025-06-12", // Updated start date
+          endDate: "2025-06-19", // Updated end date
+          examCount: response.data.examCount, // Keep examCount same
+        });
       } catch (err) {
         console.error("Error fetching exam data:", err);
         setError("Failed to load exam details.");
@@ -426,10 +432,6 @@ export default function PreviewPage() {
                 Role-{" "}
                 <strong>{formData.cdaExperienceRole || "__________"}</strong>
               </p>
-              <p>
-                Total Exams:{" "}
-                <strong>{examData.examCount || "__________"}</strong>
-              </p>
               <p className="italic text-xs">
                 *The meaning of relatives is defined as under: Wife, husband,
                 son, daughter, grand-son, granddaughter, brother, sister,
@@ -461,9 +463,8 @@ export default function PreviewPage() {
                 STARPARTH TECHNOLOGIES PVT LTD
               </p>
               <p className="text-sm">
-                <strong>{examData.examName || "__________"}</strong> (
-                <strong>{formatDate(examData.startDate)}</strong> to{" "}
-                <strong>{formatDate(examData.endDate)}</strong>)
+                ICG (12th June to 19th June 2025){" "}
+                {/* Updated exam name and dates */}
               </p>
               <p className="text-sm font-bold">Self-Declaration - COVID-19</p>
             </div>
@@ -557,9 +558,8 @@ export default function PreviewPage() {
                 STARPARTH TECHNOLOGIES PVT LTD
               </p>
               <p className="text-sm">
-                <strong>{examData.examName || "__________"}</strong> (
-                <strong>{formatDate(examData.startDate)}</strong> to{" "}
-                <strong>{formatDate(examData.endDate)}</strong>)
+                ICG (12th June to 19th June 2025){" "}
+                {/* Updated exam name and dates */}
               </p>
               <p className="text-lg font-bold underline">Undertaking</p>
             </div>
@@ -569,15 +569,13 @@ export default function PreviewPage() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the <strong>{examData.examName || "__________"}</strong>{" "}
-                held from <strong>{formatDate(examData.startDate)}</strong> to{" "}
-                <strong>{formatDate(examData.endDate)}</strong>.
+                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
-                I will be there at from{" "}
-                <strong>{formatDate(examData.startDate)}</strong> to{" "}
-                <strong>{formatDate(examData.endDate)}</strong> and this is
-                final confirmation, and I will not refuse in any condition.
+                I will be there at from 12th June to 19th June 2025 and this is
+                final confirmation, and I will not refuse in any condition.{" "}
+                {/* Updated dates */}
               </p>
               <p className="font-bold mt-4">Penalty Clause:</p>
               <ol className="list-decimal list-inside mb-4 pl-4">
@@ -680,15 +678,13 @@ export default function PreviewPage() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the <strong>{examData.examName || "__________"}</strong>{" "}
-                held from <strong>{formatDate(examData.startDate)}</strong> to{" "}
-                <strong>{formatDate(examData.endDate)}</strong>.
+                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
-                I will be there at from{" "}
-                <strong>{formatDate(examData.startDate)}</strong> to{" "}
-                <strong>{formatDate(examData.endDate)}</strong> and this is
-                final confirmation, and I will not refuse in any condition.
+                I will be there at from 12th June to 19th June 2025 and this is
+                final confirmation, and I will not refuse in any condition.{" "}
+                {/* Updated dates */}
               </p>
               <p className="mt-2">
                 I will be agreeing to work as a Chief Invigilator on behalf of
@@ -754,9 +750,8 @@ export default function PreviewPage() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the <strong>{examData.examName || "__________"}</strong>{" "}
-                held from <strong>{formatDate(examData.startDate)}</strong> to{" "}
-                <strong>{formatDate(examData.endDate)}</strong>.
+                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
                 I am interested to join a Certification Program i.e., Basic
@@ -766,10 +761,9 @@ export default function PreviewPage() {
               <p className="mt-2">
                 To Join this certification program, I am authorizing StarParth
                 Technologies Pvt Ltd to Debit a Sum of Rs. <strong>2000</strong>{" "}
-                from the total payout of{" "}
-                <strong>{examData.examName || "__________"}</strong> prior and
-                after deducting this amount rest of amount will pay me through
-                Bank/ Cash.
+                from the total payout of ICG prior and after deducting this
+                amount rest of amount will pay me through Bank/ Cash.{" "}
+                {/* Updated exam name */}
               </p>
               <div className="flex justify-between mt-4">
                 <p>
@@ -817,9 +811,8 @@ export default function PreviewPage() {
             <div className="text-center mb-4">
               <p className="text-xl font-bold">NETPARAM TECHNOLOGIES PVT LTD</p>
               <p className="text-sm">
-                <strong>{examData.examName || "__________"}</strong> (
-                <strong>{formatDate(examData.startDate)}</strong> to{" "}
-                <strong>{formatDate(examData.endDate)}</strong>)
+                ICG (12th June to 19th June 2025){" "}
+                {/* Updated exam name and dates */}
               </p>
               <p className="text-lg font-bold underline">Undertaking</p>
             </div>
@@ -829,15 +822,13 @@ export default function PreviewPage() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the <strong>{examData.examName || "__________"}</strong>{" "}
-                held from <strong>{formatDate(examData.startDate)}</strong> to{" "}
-                <strong>{formatDate(examData.endDate)}</strong>.
+                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
-                I will be there at from{" "}
-                <strong>{formatDate(examData.startDate)}</strong> to{" "}
-                <strong>{formatDate(examData.endDate)}</strong> and this is
-                final confirmation, and I will not refuse in any condition.
+                I will be there at from 12th June to 19th June 2025 and this is
+                final confirmation, and I will not refuse in any condition.{" "}
+                {/* Updated dates */}
               </p>
               <p className="font-bold mt-4">Penalty Clause:</p>
               <ol className="list-decimal list-inside mb-4 pl-4">
@@ -940,15 +931,13 @@ export default function PreviewPage() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the <strong>{examData.examName || "__________"}</strong>{" "}
-                held from <strong>{formatDate(examData.startDate)}</strong> to{" "}
-                <strong>{formatDate(examData.endDate)}</strong>.
+                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
-                I will be there at from{" "}
-                <strong>{formatDate(examData.startDate)}</strong> to{" "}
-                <strong>{formatDate(examData.endDate)}</strong> and this is
-                final confirmation, and I will not refuse in any condition.
+                I will be there at from 12th June to 19th June 2025 and this is
+                final confirmation, and I will not refuse in any condition.{" "}
+                {/* Updated dates */}
               </p>
               <p className="mt-2">
                 I will be agreeing to work as a Chief Invigilator on behalf of
@@ -1013,11 +1002,9 @@ export default function PreviewPage() {
                 I <strong>{formData.name || "__________"}</strong> S/O{" "}
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
-                <strong>{formData.aadhaarNo || "__________ infantile"}</strong>{" "}
-                is working for the{" "}
-                <strong>{examData.examName || "__________"}</strong> held from{" "}
-                <strong>{formatDate(examData.startDate)}</strong> to{" "}
-                <strong>{formatDate(examData.endDate)}</strong>.
+                <strong>{formData.aadhaarNo || "__________"}</strong> is working
+                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
                 I am interested to join a Certification Program i.e., Basic
@@ -1027,10 +1014,9 @@ export default function PreviewPage() {
               <p className="mt-2">
                 To Join this certification program, I am authorizing Netparam
                 Technologies Pvt Ltd to Debit a Sum of Rs. <strong>2000</strong>{" "}
-                from the total payout of{" "}
-                <strong>{examData.examName || "__________"}</strong> prior and
-                after deducting this amount rest of amount will pay me through
-                Bank/ Cash.
+                from the total payout of ICG prior and after deducting this
+                amount rest of amount will pay me through Bank/ Cash.{" "}
+                {/* Updated exam name */}
               </p>
               <div className="flex justify-between mt-4">
                 <p>
@@ -1087,7 +1073,8 @@ export default function PreviewPage() {
                 I, <strong>{formData.name || "__________"}</strong> S/O{" "}
                 <strong>{formData.sonOf || "__________"}</strong> hereby declare
                 that I am not appearing in the{" "}
-                <strong>{examData.examName || "__________"}</strong>,{" "}
+                <strong>{examData.examName || "__________"}</strong>{" "}
+                examination,{" "}
                 <strong>{formatHeldDateNumeric(examData.heldDate)}</strong>{" "}
                 <strong>{examData.heldDate || "__________"}</strong>, held from{" "}
                 <strong>{formatDate(examData.startDate)}</strong> to{" "}
@@ -1095,7 +1082,7 @@ export default function PreviewPage() {
                 either at the exam centre or have been deputed at any other
                 centre which is involved in the conduct of the exam. If I am
                 absent or leave the examination Centre at any time, in any
-                scenario on the abovementioned dates, or found doing any
+                scenario on the above mentioned dates, or found doing any
                 Suspicious Activity / Malpractice / Unethical Behavior /
                 Professional Misconduct, then NetParam Technologies Pvt Ltd /
                 NETCOM/C-DAC/IAF has full authority to take any disciplinary
@@ -1221,10 +1208,6 @@ export default function PreviewPage() {
                 Role-{" "}
                 <strong>{formData.cdaExperienceRole || "__________"}</strong>
               </p>
-              <p>
-                Total Exams:{" "}
-                <strong>{examData.examCount || "__________"}</strong>
-              </p>
               <p className="italic text-xs">
                 *The meaning of relatives is defined as under: Wife, husband,
                 son, daughter, grand-son, granddaughter, brother, sister,
@@ -1287,8 +1270,8 @@ export default function PreviewPage() {
           page-break-inside: avoid;
           background-color: #ffffff !important;
           box-sizing: border-box;
-          max-height: 270mm;
-          overflow: hidden;
+          max-height: 300mm; /* A4 height 297mm hai, margins ke saath 270mm tak content fit hona chahiye */
+          overflow: hidden; /* Overflow content ko hide karo, taki dusre page par na jaye */
         }
         .preview-section .flex.justify-between {
           width: 100%;
@@ -1323,11 +1306,11 @@ export default function PreviewPage() {
           display: block;
         }
         .preview-section .text-sm p {
-          margin: 2pt 0;
+          margin: 2pt 0; /* Paragraphs ke beech margin kam kiya */
         }
         .preview-section .text-xs:last-child {
           position: relative;
-          bottom: 0;
+          bottom: 0; /* Last paragraph ko bottom se fix karo */
           margin-top: 1pt;
           page-break-inside: avoid;
           display: block;
@@ -1360,7 +1343,7 @@ export default function PreviewPage() {
             width: 210mm;
             max-width: 210mm;
             margin: 0;
-            max-height: 270mm;
+            max-height: 300mm; /* Print ke time bhi height fix rakho */
           }
           button,
           h1,
