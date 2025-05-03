@@ -9,8 +9,17 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { UploadButton } from "@/components/FileUploader";
-import ClipLoader from "react-spinners/ClipLoader";
+import ClipLoader from "react-spinners/ClipLoader"; // humbly imported spinner
 import Cookies from "js-cookie";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
 
 interface ApplyFormData {
   name: string;
@@ -49,7 +58,7 @@ interface ApplyFormData {
   status: string;
 }
 
-export default function ApplyPage() {
+export default function EditPage() {
   const router = useRouter();
   const [photoPreviewUrl, setPhotoPreviewUrl] = useState("");
   const [signaturePreviewUrl, setSignaturePreviewUrl] = useState("");
@@ -96,13 +105,28 @@ export default function ApplyPage() {
   const [openSection, setOpenSection] = useState<string | null>(
     "Personal Details"
   );
+  const [authStatus, setAuthStatus] = useState<string | null>(null); // State for status
 
+  // Fetch authdata from cookies
+  useEffect(() => {
+    const authData = Cookies.get("authData");
+
+    if (authData) {
+      try {
+        const parsedData = JSON.parse(authData);
+        setAuthStatus(parsedData.status || ""); // Assuming status is in authdata
+      } catch (err) {
+        console.error("Error parsing authdata:", err);
+      }
+    }
+    setLoading(false);
+  }, []);
   // Fetch user data from backend
   const getUser = async () => {
     try {
       const token = Cookies.get("token");
       if (!token) {
-        alert("Login fir se karo bhai, token nahi mila");
+        toast.warning("Please Login again User Not found.");
         router.push("/login");
         setIsSubmitting(false); // Stop loading on error
         return;
@@ -171,48 +195,66 @@ export default function ApplyPage() {
     setFormData((prev) => ({ ...prev, thumbprint: url })); // Update formData
     setThumbprintPreviewUrl(url || ""); // Update preview URL
   };
+  // Helper function to calculate age from DOB
 
   const validateForm = () => {
     if (!formData.name || formData.name.trim().length < 2) {
-      setError("Name must be at least 2 characters long!");
+      toast.error("Name must be at least 2 characters long!");
       return false;
     }
     if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      setError("Please enter a valid email address!");
+      toast.error("Please enter a valid email address!");
       return false;
     }
     if (!formData.dob) {
-      setError("Date of Birth is required!");
+      toast.error("Date of Birth is required!");
+      return false;
+    }
+
+    const dob = new Date(formData.dob);
+    const today = new Date();
+    const age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    const dayDiff = today.getDate() - dob.getDate();
+
+    // Adjust age if birthday hasn't occurred this year
+    let adjustedAge = age;
+    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+      adjustedAge--;
+    }
+
+    if (adjustedAge < 21) {
+      toast.error("Candidate must be at least 21 years old!");
       return false;
     }
     if (!formData.phone || !/^\d{10}$/.test(formData.phone)) {
-      setError("Phone number must be exactly 10 digits!");
+      toast.error("Phone number must be exactly 10 digits!");
       return false;
     }
     if (!formData.area || formData.area.trim().length < 2) {
-      setError("Area must be at least 2 characters long!");
+      toast.error("Area must be at least 2 characters long!");
       return false;
     }
     if (!formData.landmark || formData.landmark.trim().length < 2) {
-      setError("Landmark must be at least 2 characters long!");
+      toast.error("Landmark must be at least 2 characters long!");
       return false;
     }
     if (!formData.address || formData.address.trim().length < 5) {
-      setError("Address must be at least 5 characters long!");
+      toast.error("Address must be at least 5 characters long!");
       return false;
     }
     if (
       !formData.examCityPreference1 ||
       formData.examCityPreference1.trim().length < 2
     ) {
-      setError("Exam City Preference 1 must be at least 2 characters long!");
+      toast.error("Exam City Preference 1 must be at least 2 characters long!");
       return false;
     }
     if (
       !formData.examCityPreference2 ||
       formData.examCityPreference2.trim().length < 2
     ) {
-      setError("Exam City Preference 2 must be at least 2 characters long!");
+      toast.error("Exam City Preference 2 must be at least 2 characters long!");
       return false;
     }
     if (formData.previousCdaExperience === "Yes") {
@@ -220,76 +262,76 @@ export default function ApplyPage() {
         !formData.cdaExperienceYears ||
         !/^\d+$/.test(formData.cdaExperienceYears)
       ) {
-        setError("Please enter valid years of CDA experience!");
+        toast.error("Please enter valid years of CDAC experience!");
         return false;
       }
       if (
         !formData.cdaExperienceRole ||
         formData.cdaExperienceRole.trim().length < 2
       ) {
-        setError("CDA Experience Role must be at least 2 characters long!");
+        toast.error("CDAC Experience Role must be at least 2 characters long!");
         return false;
       }
     }
     if (!formData.photo) {
-      setError("Passport Size Photo is required!");
+      toast.error("Passport Size Photo is required!");
       return false;
     }
     if (!formData.signature) {
-      setError("Signature is required!");
+      toast.error("Signature is required!");
       return false;
     }
     if (!formData.thumbprint) {
-      setError("Thumbprint is required!");
+      toast.error("Thumbprint is required!");
       return false;
     }
     if (!formData.aadhaarNo || !/^\d{12}$/.test(formData.aadhaarNo)) {
-      setError("Aadhaar number must be exactly 12 digits!");
+      toast.error("Aadhaar number must be exactly 12 digits!");
       return false;
     }
     if (!formData.penaltyClauseAgreement) {
-      setError("You must agree to the penalty clauses!");
+      toast.error("You must agree to the penalty clauses!");
       return false;
     }
     if (!formData.covidDeclarationAgreement) {
-      setError("You must agree to the COVID-19 declaration!");
+      toast.error("You must agree to the COVID-19 declaration!");
       return false;
     }
     if (
       !formData.accountHolderName ||
       formData.accountHolderName.trim().length < 2
     ) {
-      setError("Account Holder Name must be at least 2 characters long!");
+      toast.error("Account Holder Name must be at least 2 characters long!");
       return false;
     }
     if (!formData.bankName || formData.bankName.trim().length < 2) {
-      setError("Bank Name must be at least 2 characters long!");
+      toast.error("Bank Name must be at least 2 characters long!");
       return false;
     }
     if (!formData.ifsc || !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(formData.ifsc)) {
-      setError("IFSC code must be valid (e.g., ABCD0123456)!");
+      toast.error("IFSC code must be valid (e.g., ABCD0123456)!");
       return false;
     }
     if (!formData.branch || formData.branch.trim().length < 2) {
-      setError("Branch must be at least 2 characters long!");
+      toast.error("Branch must be at least 2 characters long!");
       return false;
     }
     if (
       !formData.bankAccountNo ||
       !/^\d{10,18}$/.test(formData.bankAccountNo)
     ) {
-      setError("Bank Account Number must be between 10 and 18 digits!");
+      toast.error("Bank Account Number must be between 10 and 18 digits!");
       return false;
     }
     if (!formData.sonOf || formData.sonOf.trim().length < 2) {
-      setError("S/o or D/o must be at least 2 characters long!");
+      toast.error("S/o or D/o must be at least 2 characters long!");
       return false;
     }
     if (!formData.resident || formData.resident.trim().length < 2) {
-      setError("Resident must be at least 2 characters long!");
+      toast.error("Resident must be at least 2 characters long!");
       return false;
     }
-    setError("");
+
     return true;
   };
 
@@ -301,7 +343,7 @@ export default function ApplyPage() {
     const token = Cookies.get("token");
 
     if (!token) {
-      alert("Login fir se karo bhai, token nahi mila");
+      toast.warning("Token not found please login again.");
       router.push("/login");
       setIsSubmitting(false); // Stop loading on error
       return;
@@ -318,12 +360,13 @@ export default function ApplyPage() {
       signature: formData.signature || signaturePreviewUrl, // Ensure signature URL is saved
       thumbprint: formData.thumbprint || thumbprintPreviewUrl,
       status: "pending",
+      // status: "pending",
     };
 
     console.log("Saving to sessionStorage:", updatedData); // Debug log
     sessionStorage.setItem("formData", JSON.stringify(updatedData));
     setTimeout(() => {
-      router.push("apply/preview");
+      router.push("/user/apply/preview");
       setIsSubmitting(false); // Stop loading after navigation
     }, 1000); // Simulate API call delay
   };
@@ -408,15 +451,35 @@ export default function ApplyPage() {
     );
   }
 
+  // Check if status is approved
+  if (authStatus === "approve") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <Card className="w-full max-w-md p-6 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-blue-600 text-center">
+              Application Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-lg text-green-600 font-semibold mb-4">
+              Your form is approved!
+            </p>
+            <p className="text-gray-600">
+              For editing or re-applying, please contact the admin.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl">
         <h1 className="text-3xl font-bold text-blue-600 mb-6 text-center">
           Apply as System Support Administrator
         </h1>
-
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Section 1: Personal Details */}
           <div className="border-b border-gray-300">
@@ -614,7 +677,7 @@ export default function ApplyPage() {
                 </div>
                 <div>
                   <Label className="text-blue-600">
-                    Previous CDA Exam Experience
+                    Previous CDAC Exam Experience
                   </Label>
                   <RadioGroup
                     name="previousCdaExperience"
@@ -664,19 +727,44 @@ export default function ApplyPage() {
                       >
                         Role
                       </Label>
-                      <Input
-                        id="cdaExperienceRole"
+                      <Select
                         name="cdaExperienceRole"
-                        type="text"
                         value={formData.cdaExperienceRole}
-                        onChange={handleChange}
-                        placeholder="Enter your role"
-                        className="mt-1 border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+                        onValueChange={(value) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            cdaExperienceRole: value,
+                          }))
+                        }
                         required
-                      />
+                      >
+                        <SelectTrigger className="mt-1 border-blue-300 focus:border-blue-500 focus:ring-blue-500">
+                          <SelectValue placeholder="Select your role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="CIA1">CIA1</SelectItem>
+                          <SelectItem value="CIA2">CIA2</SelectItem>
+                          <SelectItem value="CIA3">CIA3</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </>
                 )}
+                <div>
+                  <Label htmlFor="aadhaarNo" className="text-blue-600">
+                    Aadhaar No.
+                  </Label>
+                  <Input
+                    id="aadhaarNo"
+                    name="aadhaarNo"
+                    type="text"
+                    value={formData.aadhaarNo}
+                    onChange={handleChange}
+                    placeholder="Enter your 12-digit Aadhaar number"
+                    className="mt-1 border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+                    required
+                  />
+                </div>
                 <div>
                   <Label htmlFor="photo" className="text-blue-600">
                     Passport Size Photo
@@ -695,14 +783,14 @@ export default function ApplyPage() {
                     onClientUploadComplete={(res) => {
                       if (res && res[0]?.url) {
                         const url = res[0].url;
-                        alert("Photo uploaded!");
+                        toast.success("Photo uploaded!");
                         setPhotoPreviewUrl(url);
                         handlePhotoUpload(url);
                       }
                     }}
-                    onUploadError={(error) =>
-                      alert("Upload error: " + error.message)
-                    }
+                    onUploadError={(error) => {
+                      toast.error(`Photo Upload error: ${error.message}`);
+                    }}
                   />
                   {photoPreviewUrl && (
                     <div className="mt-2">
@@ -735,14 +823,14 @@ export default function ApplyPage() {
                     onClientUploadComplete={(res) => {
                       if (res && res[0]?.url) {
                         const url = res[0].url;
-                        alert("Signature uploaded!");
+                        toast.success("Signature uploaded!");
                         setSignaturePreviewUrl(url);
                         handleSignatureUpload(url);
                       }
                     }}
-                    onUploadError={(error) =>
-                      alert("Upload error: " + error.message)
-                    }
+                    onUploadError={(error) => {
+                      toast.error(`Signature Upload error: ${error.message}`);
+                    }}
                   />
                   {signaturePreviewUrl && (
                     <div className="mt-2">
@@ -775,14 +863,14 @@ export default function ApplyPage() {
                     onClientUploadComplete={(res) => {
                       if (res && res[0]?.url) {
                         const url = res[0].url;
-                        alert("Thumbprint uploaded!");
+                        toast.success("Thumbprint uploaded!");
                         setThumbprintPreviewUrl(url);
                         handleThumbprintUpload(url);
                       }
                     }}
-                    onUploadError={(error) =>
-                      alert("Upload error: " + error.message)
-                    }
+                    onUploadError={(error) => {
+                      toast.error(`Thumbprint Upload error: ${error.message}`);
+                    }}
                   />
                   {thumbprintPreviewUrl && (
                     <div className="mt-2">
@@ -797,12 +885,32 @@ export default function ApplyPage() {
                     </div>
                   )}
                 </div>
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="penaltyClauseAgreement"
+                      checked={formData.penaltyClauseAgreement}
+                      onCheckedChange={(checked) =>
+                        handleCheckboxChange(
+                          "penaltyClauseAgreement",
+                          checked as boolean
+                        )
+                      }
+                    />
+                    <Label
+                      htmlFor="penaltyClauseAgreement"
+                      className="text-blue-600"
+                    >
+                      I agree to the penalty clauses and undertaking terms.
+                    </Label>
+                  </div>
+                </div>
               </div>
             )}
           </div>
 
           {/* Section 2: Undertaking */}
-          <div className="border-b border-gray-300">
+          {/* <div className="border-b border-gray-300">
             <h2
               className="text-2xl font-semibold text-blue-600 mb-4 cursor-pointer"
               onClick={() => toggleSection("Undertaking")}
@@ -846,7 +954,7 @@ export default function ApplyPage() {
                 </div>
               </div>
             )}
-          </div>
+          </div> */}
 
           {/* Section 3: Self-Declaration – COVID-19 */}
           <div className="border-b border-gray-300">

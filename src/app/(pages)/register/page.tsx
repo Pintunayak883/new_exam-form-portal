@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import ClipLoader from "react-spinners/ClipLoader";
 import { Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
 
 // Signup form ka data type
 interface SignupFormData {
@@ -25,8 +26,6 @@ export default function SignupPage() {
     password: "",
     confirmPassword: "",
   });
-  const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -34,17 +33,18 @@ export default function SignupPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    if (name === "name" && /[^a-zA-Z\s]/.test(value)) {
+      return;
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage("");
-    setSuccessMessage("");
     setIsLoading(true);
 
     if (formData.password !== formData.confirmPassword) {
-      setErrorMessage("Passwords do not match!");
+      toast.error("Passwords do not match!");
       setIsLoading(false);
       return;
     }
@@ -56,15 +56,15 @@ export default function SignupPage() {
         password: formData.password,
       });
 
-      setSuccessMessage("Signup successful! Redirecting to login...");
+      toast.success("Signup successful! Redirecting to login...");
       setTimeout(() => router.push("/login"), 2000);
     } catch (error: any) {
       if (axios.isAxiosError(error)) {
         const msg =
           error.response?.data?.message || "Signup failed. Please try again.";
-        setErrorMessage(msg);
+        toast.error(msg);
       } else {
-        setErrorMessage("Something went wrong. Please try again.");
+        toast.error("Something went wrong. Please try again.");
       }
     } finally {
       setIsLoading(false);
@@ -78,15 +78,6 @@ export default function SignupPage() {
           Sign Up for Exam Form Portal
         </h1>
 
-        {errorMessage && (
-          <p className="text-center text-red-600 font-medium">{errorMessage}</p>
-        )}
-        {successMessage && (
-          <p className="text-center text-green-600 font-medium">
-            {successMessage}
-          </p>
-        )}
-
         <form onSubmit={handleSubmit} className="space-y-5 mt-4">
           <div>
             <Label htmlFor="name" className="text-indigo-700 font-medium">
@@ -95,6 +86,7 @@ export default function SignupPage() {
             <Input
               id="name"
               name="name"
+              type="text"
               value={formData.name}
               onChange={handleChange}
               placeholder="Enter your full name"

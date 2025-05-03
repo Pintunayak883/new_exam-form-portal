@@ -12,6 +12,8 @@ import { loginSuccess } from "@/redux/authSlice";
 import Link from "next/link";
 import ClipLoader from "react-spinners/ClipLoader";
 import { Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
+
 interface LoginFormData {
   email: string;
   password: string;
@@ -22,7 +24,7 @@ export default function LoginPage() {
     email: "",
     password: "",
   });
-  const [errorMessage, setErrorMessage] = useState<string>("");
+
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
@@ -36,7 +38,6 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage("");
     setIsLoading(true);
 
     try {
@@ -57,6 +58,8 @@ export default function LoginPage() {
           })
         );
 
+        toast.success("Login successful!");
+
         if (data.role === "admin") {
           router.push("/admin/dashboard");
         } else if (data.role === "candidate") {
@@ -65,11 +68,11 @@ export default function LoginPage() {
           router.push("/");
         }
       } else {
-        console.log(data.message);
+        toast.error(data.message || "Something went wrong.");
       }
     } catch (error: any) {
       console.error("Login error:", error);
-      setErrorMessage(error.response?.data?.message || "Something went wrong.");
+      toast.error(error.response?.data?.message || "Something went wrong.");
     } finally {
       setIsLoading(false);
     }
@@ -95,12 +98,6 @@ export default function LoginPage() {
           Login to Exam Form Portal
         </h1>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {errorMessage && (
-            <p className="text-red-600 text-center font-semibold">
-              {errorMessage}
-            </p>
-          )}
-
           {/* Email Input */}
           <div className="space-y-2">
             <Label htmlFor="email" className="text-blue-700 font-medium">

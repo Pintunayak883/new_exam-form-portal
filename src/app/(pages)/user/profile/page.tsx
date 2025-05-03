@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import Cookies from "js-cookie";
+import { toast } from "sonner";
 
 // Interface for profile data, covering all fields
 interface ProfileData {
@@ -56,7 +57,6 @@ const Profile = () => {
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [editMode, setEditMode] = useState<{ [key: string]: boolean }>({});
   const [editedData, setEditedData] = useState<ProfileData | null>(null);
-  const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
 
   // Humble fetch: Getting user data on mount
@@ -66,7 +66,7 @@ const Profile = () => {
       try {
         const token = Cookies.get("token");
         if (!token) {
-          setError("Bhai, pehle login toh kar le!");
+          toast.warning("token not found please login first.");
           router.push("/login");
           return;
         }
@@ -82,10 +82,10 @@ const Profile = () => {
         setEditedData(data);
       } catch (err: any) {
         if (err.response?.status === 401) {
-          setError("Session khatam, login kar ke aaja!");
+          toast.error("Session is over please login again.");
           router.push("/login");
         } else {
-          setError(err.response?.data?.message || "Data nahi mila, bhai!");
+          toast.error(err.response?.data?.message || "Data is not found");
         }
       } finally {
         setLoading(false);
@@ -116,7 +116,7 @@ const Profile = () => {
       try {
         const token = sessionStorage.getItem("token");
         if (!token) {
-          setError("Token nahi hai, login kar ke aaja!");
+          toast.warning("Token is not found please login again.");
           router.push("/login");
           return;
         }
@@ -136,13 +136,13 @@ const Profile = () => {
           [field]: editedData[field],
         }));
         setEditMode((prev) => ({ ...prev, [field]: false }));
-        alert("Details update ho gaye, ekdum jhakaas!");
+        toast.success("Details update successfully.");
       } catch (err: any) {
         if (err.response?.status === 401) {
-          setError("Session khatam, login kar ke aaja!");
+          toast.error("Session is over please login agin.");
           router.push("/login");
         } else {
-          setError(err.response?.data?.message || "Update nahi hua, bhai!");
+          toast.error(err.response?.data?.message || "It's not Update");
         }
       }
     }
@@ -161,17 +161,13 @@ const Profile = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-        <p className="ml-2">Data load ho raha hai, thodi der ruk...</p>
+        <p className="ml-2">Please wait a moment data is loading.</p>
       </div>
     );
   }
 
   if (!profileData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p className="text-red-500">{error || "Kuch toh gadbad hai, bhai!"}</p>
-      </div>
-    );
+    return toast.error("Profile is not found.");
   }
 
   return (
@@ -181,12 +177,6 @@ const Profile = () => {
         <h1 className="text-3xl md:text-4xl font-bold text-center mb-8 text-blue-800 capitalize">
           {profileData.name ? `${profileData.name} ` : "User Profile"}
         </h1>
-
-        {error && (
-          <p className="text-red-500 text-center mb-6 bg-red-100 p-3 rounded-lg">
-            {error}
-          </p>
-        )}
 
         {/* Personal Details Card */}
         <Card className="mb-8 shadow-xl">
@@ -327,7 +317,7 @@ const Profile = () => {
             {[
               {
                 key: "previousCdaExperience",
-                label: "Previous CDA Experience",
+                label: "Previous CDAC Experience",
               },
               { key: "cdaExperienceYears", label: "Years of Experience" },
               { key: "cdaExperienceRole", label: "Role in CDA" },

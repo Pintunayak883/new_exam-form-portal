@@ -14,7 +14,7 @@ export default function HeroSection({
   title = "Welcome to Exam Form Portal",
   tagline = "Apply for System Support Administrator Role with Ease",
   ctaText = "Apply Now",
-  ctaLink = "user/apply",
+  ctaLink = "/user/apply",
 }: HeroSectionProps) {
   return (
     <section className="bg-gradient-to-r from-blue-500 to-blue-700 text-white min-h-[calc(100vh-64px-96px)] flex items-center justify-center">

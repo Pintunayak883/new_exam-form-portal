@@ -22,7 +22,7 @@ export async function GET() {
     })
       .sort({ createdAt: -1 })
       .lean();
-
+    //console.log(users);
     return NextResponse.json(
       {
         success: true,

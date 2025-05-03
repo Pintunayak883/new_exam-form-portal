@@ -8,6 +8,7 @@ import Cookies from "js-cookie";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 // Interface for submission data
 interface SubmissionData {
@@ -24,10 +25,8 @@ interface SubmissionData {
 const Submission = () => {
   const router = useRouter();
 
-  // State variables
   const [submissions, setSubmissions] = useState<SubmissionData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>("");
 
   useEffect(() => {
     const fetchSubmissions = async () => {
@@ -35,7 +34,7 @@ const Submission = () => {
         const token = Cookies.get("token");
 
         if (!token) {
-          setError("Bhai, pehle login toh kar le!");
+          toast.error("Please login to continue.");
           router.push("/login");
           return;
         }
@@ -45,7 +44,7 @@ const Submission = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log("subbmision", response);
+
         let data = Array.isArray(response.data)
           ? response.data
           : [response.data];
@@ -55,15 +54,16 @@ const Submission = () => {
           status: item.status || "pending",
           submittedAt: item.submittedAt || new Date().toISOString(),
         }));
-        console.log("befor set", data);
+
         setSubmissions(data);
       } catch (err: any) {
         if (err.response?.status === 401) {
-          setError("Session khatam, login kar ke aaja!");
+          toast.error("Your session has expired. Please login again.");
           router.push("/login");
         } else {
-          setError(
-            err.response?.data?.message || "Submissions nahi mili, bhai!"
+          toast.error(
+            err.response?.data?.message ||
+              "Failed to fetch submissions. Please try again."
           );
         }
       } finally {
@@ -90,15 +90,7 @@ const Submission = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-        <p className="ml-2">Please wait..</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <p className="text-red-500">{error}</p>
+        <p className="ml-2">Please wait...</p>
       </div>
     );
   }
@@ -111,7 +103,7 @@ const Submission = () => {
         </h1>
 
         {submissions.length === 0 ? (
-          <p className="text-center text-gray-600">No Submission for now</p>
+          <p className="text-center text-gray-600">No submissions found.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {submissions.map((submission) => (
@@ -159,7 +151,10 @@ const Submission = () => {
                   {submission.status === "pending" ||
                   submission.status === "reject" ? (
                     <Button
-                      onClick={() => router.push(`submissions/edit-submission`)}
+                      onClick={() => {
+                        toast.info("Redirecting to edit submission...");
+                        router.push(`/user/submissions/edit-submission`);
+                      }}
                       className="mt-4 bg-blue-600 text-white hover:bg-blue-700 px-4 py-2 rounded-md transition-transform transform hover:scale-105"
                     >
                       Edit Submission

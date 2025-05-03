@@ -9,6 +9,7 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import Cookies from "js-cookie";
 import ClipLoader from "react-spinners/ClipLoader";
+import { toast } from "sonner";
 
 interface ApplyFormData {
   name: string;
@@ -44,7 +45,6 @@ interface ApplyFormData {
   currentDate: string;
   sonOf: string;
   resident: string;
-  // New fields for exam details
   examName: string;
   heldDate: string;
   startDate: string;
@@ -64,7 +64,13 @@ export default function PreviewPage() {
     startDate: string;
     endDate: string;
     examCount: number;
-  } | null>(null);
+  }>({
+    examName: "",
+    heldDate: "",
+    startDate: "",
+    endDate: "",
+    examCount: 0,
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const pdfRef = useRef<HTMLDivElement>(null);
@@ -107,16 +113,15 @@ export default function PreviewPage() {
     const data = sessionStorage.getItem("formData");
     if (data) {
       setFormData(JSON.parse(data));
+      console.log(data);
     } else {
       router.push("/apply");
     }
-    console.log(formData?.dob);
+
     // Fetch latest exam data from API
     const fetchExamData = async () => {
       try {
         const response = await axios.get("/api/admin/form");
-        console.log("helld", response.data.data.heldDate);
-        console.log(response);
         setExamData({
           examName: response.data.data.examName, // Updated exam name
           heldDate: response.data.data.heldDate, // Updated held date
@@ -126,7 +131,7 @@ export default function PreviewPage() {
         });
       } catch (err) {
         console.error("Error fetching exam data:", err);
-        setError("Failed to load exam details.");
+        toast.error("Failed to load exam details.");
       }
     };
     fetchExamData();
@@ -202,7 +207,7 @@ export default function PreviewPage() {
       pdf.save("application-preview.pdf");
     } catch (error) {
       console.error("Error generating PDF:", error);
-      setError("Failed to generate PDF. Please try again.");
+      toast.error("Failed to generate PDF. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -211,7 +216,7 @@ export default function PreviewPage() {
   // Humble function to handle form submission
   const handleConfirmSubmit = async () => {
     if (!isChecked) {
-      setCheckboxError("Please accept the declaration to proceed.");
+      toast.error("Please accept the declaration to proceed.");
       return;
     }
 
@@ -221,7 +226,7 @@ export default function PreviewPage() {
 
     const token = Cookies.get("token");
     if (!token) {
-      alert("Login fir se karo bhai, token nahi mila");
+      toast.warning("Token not found Please login again.");
       router.push("/login");
       return;
     }
@@ -242,13 +247,13 @@ export default function PreviewPage() {
           withCredentials: true,
         }
       );
-      console.log("Response: ", response.data);
-      alert("Details updated successfully!");
+
+      toast.success("Details updated successfully!");
       sessionStorage.removeItem("formData");
       router.push("/user/submissions");
     } catch (err: any) {
       console.error("Error updating details: ", err);
-      setError("Error updating details. Please try again.");
+      toast.error("Error updating details. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -1234,7 +1239,7 @@ export default function PreviewPage() {
         </div>
 
         {/* Humble error display */}
-        {error && <p className="text-red-500 text-center mt-4">{error}</p>}
+
         <div className="mt-6">
           <div className="flex items-center gap-2">
             <input
@@ -1254,9 +1259,6 @@ export default function PreviewPage() {
               appropriate action against me.
             </label>
           </div>
-          {checkboxError && (
-            <p className="text-red-500 text-sm mt-2">{checkboxError}</p>
-          )}
         </div>
         {/* Humble navigation buttons */}
         <div className="flex justify-between mt-6">

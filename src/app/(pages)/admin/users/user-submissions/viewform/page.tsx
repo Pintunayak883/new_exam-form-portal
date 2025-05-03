@@ -11,6 +11,7 @@ import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { PulseLoader } from "react-spinners";
 import { toast } from "sonner";
+import axios from "axios";
 
 // Interface for ApplyFormData (same as your code)
 interface ApplyFormData {
@@ -59,8 +60,47 @@ function ViewPageContent() {
   const [pdfLoading, setPdfLoading] = useState(false);
   const [remark, setRemark] = useState("");
   const [error, setError] = useState("");
+
+  const [examData, setExamData] = useState<{
+    examName: string;
+    heldDate: string;
+    startDate: string;
+    endDate: string;
+    examCount: number;
+  } | null>(null);
   const pdfRef = useRef<HTMLDivElement>(null);
 
+  // Month mapping for formatting
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  // Function to format heldDate to MM/YYYY
+  const formatHeldDateNumeric = (heldDate: string) => {
+    const [month, year] = heldDate.split(" ");
+    const monthIndex = monthNames.indexOf(month) + 1;
+    return `${monthIndex.toString().padStart(2, "0")}/${year}`;
+  };
+
+  // Function to format date to DD Month YYYY
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const day = date.getDate();
+    const month = monthNames[date.getMonth()];
+    const year = date.getFullYear();
+    return `${day} ${month} ${year}`;
+  };
   const userId = searchParams.get("id");
 
   // Fetch form data from Redux
@@ -188,6 +228,27 @@ function ViewPageContent() {
     }
   };
 
+  // Humble effect to load form data from sessionStorage and fetch exam data
+  useEffect(() => {
+    // Fetch latest exam data from API
+    const fetchExamData = async () => {
+      try {
+        const response = await axios.get("/api/admin/form");
+        setExamData({
+          examName: response.data.data.examName,
+          heldDate: response.data.data.heldDate,
+          startDate: response.data.data.startDate, // Updated start date
+          endDate: response.data.data.endDate, // Updated end date
+          examCount: response.data.data.examCount, // Keep examCount same
+        });
+      } catch (err) {
+        console.error("Error fetching exam data:", err);
+        toast.error("Failed to load exam details.");
+      }
+    };
+    fetchExamData();
+  }, [router]);
+
   if (!formData) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -278,19 +339,35 @@ function ViewPageContent() {
                 CONFIDENTIALITY AGREEMENT & APPOINTMENT LETTER
               </p>
             </div>
-            <p className="text-sm mb-2">
+            <p className="text-sm">
               I, <strong>{formData.name || "__________"}</strong> S/O{" "}
               <strong>{formData.sonOf || "__________"}</strong> hereby declare
-              that I am not appearing in the IAF Agniveer Vayu Examination,
-              01/2025, Mar 2025 held from 19th Mar to 26th Mar 2025 as a
-              candidate either at the exam centre or have been deputed at any
-              other centre which is involved in the conduct of the exam. If I am
-              absent or leave the examination Centre at any time, in any
-              scenario on the abovementioned dates, or found doing any
+              that I am not appearing in the{" "}
+              <strong>{examData ? examData.examName : "__________"}</strong>{" "}
+              examination,{" "}
+              <strong>
+                {formatHeldDateNumeric(
+                  examData ? examData.heldDate : "___________"
+                )}
+              </strong>{" "}
+              <strong>{examData ? examData.heldDate : "__________"}</strong>,
+              held from{" "}
+              <strong>
+                {formatDate(examData ? examData.startDate : "___________")}
+              </strong>{" "}
+              to{" "}
+              <strong>
+                {formatDate(examData ? examData.endDate : "__________")}
+              </strong>{" "}
+              as a candidate either at the exam centre or have been deputed at
+              any other centre which is involved in the conduct of the exam. If
+              I am absent or leave the examination Centre at any time, in any
+              scenario on the above mentioned dates, or found doing any
               Suspicious Activity / Malpractice / Unethical Behavior /
-              Professional Misconduct, then StarParth Technologies Pvt Ltd or
-              their client has full authority to take any disciplinary action
-              (regarding Duty Code of Conduct, as specified in IPC Section).
+              Professional Misconduct, then NetParam Technologies Pvt Ltd /
+              NETCOM/C-DAC/IAF has full authority to take any disciplinary
+              action (regarding Duty Code of Conduct, as specified in IPC
+              Section).
             </p>
             <p className="text-sm mb-2">
               As a condition of serving as an Operations Chief Invigilator of
@@ -439,7 +516,8 @@ function ViewPageContent() {
                 STARPARTH TECHNOLOGIES PVT LTD
               </p>
               <p className="text-sm">
-                IAF Agniveer Vayu 01/2025 (19th Mar to 26th Mar 2025)
+                ICG (12th June to 19th June 2025){" "}
+                {/* Updated exam name and dates */}
               </p>
               <p className="text-sm font-bold">Self-Declaration - COVID-19</p>
             </div>
@@ -533,7 +611,8 @@ function ViewPageContent() {
                 STARPARTH TECHNOLOGIES PVT LTD
               </p>
               <p className="text-sm">
-                IAF Agniveer Vayu 01/2025 (19th Mar to 26th Mar 2025)
+                ICG (12th June to 19th June 2025){" "}
+                {/* Updated exam name and dates */}
               </p>
               <p className="text-lg font-bold underline">Undertaking</p>
             </div>
@@ -543,12 +622,13 @@ function ViewPageContent() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the IAF Agniveer Vayu Examination (01/2025) held from 19th
-                Mar to 26th Mar 2025.
+                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
-                I will be there at from 19th Mar to 26th Mar 2025 and this is
-                final confirmation, and I will not refuse in any condition.
+                I will be there at from 12th June to 19th June 2025 and this is
+                final confirmation, and I will not refuse in any condition.{" "}
+                {/* Updated dates */}
               </p>
               <p className="font-bold mt-4">Penalty Clause:</p>
               <ol className="list-decimal list-inside mb-4 pl-4">
@@ -651,12 +731,13 @@ function ViewPageContent() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the IAF Agniveer Vayu Examination (01/2025) held from 19th
-                Mar to 26th Mar 2025.
+                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
-                I will be there at from 19th Mar to 26th Mar 2025 and this is
-                final confirmation, and I will not refuse in any condition.
+                I will be there at from 12th June to 19th June 2025 and this is
+                final confirmation, and I will not refuse in any condition.{" "}
+                {/* Updated dates */}
               </p>
               <p className="mt-2">
                 I will be agreeing to work as a Chief Invigilator on behalf of
@@ -722,8 +803,8 @@ function ViewPageContent() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the IAF Agniveer Vayu Examination (01/2025) held from 19th
-                Mar to 26th Mar 2025.
+                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
                 I am interested to join a Certification Program i.e., Basic
@@ -733,9 +814,9 @@ function ViewPageContent() {
               <p className="mt-2">
                 To Join this certification program, I am authorizing StarParth
                 Technologies Pvt Ltd to Debit a Sum of Rs. <strong>2000</strong>{" "}
-                from the total payout of IAF Agniveer Vayu 01/2025 prior and
-                after deducting this amount rest of amount will pay me through
-                Bank/ Cash.
+                from the total payout of ICG prior and after deducting this
+                amount rest of amount will pay me through Bank/ Cash.{" "}
+                {/* Updated exam name */}
               </p>
               <div className="flex justify-between mt-4">
                 <p>
@@ -783,7 +864,8 @@ function ViewPageContent() {
             <div className="text-center mb-4">
               <p className="text-xl font-bold">NETPARAM TECHNOLOGIES PVT LTD</p>
               <p className="text-sm">
-                IAF Agniveer Vayu 01/2025 (19th Mar to 26th Mar 2025)
+                ICG (12th June to 19th June 2025){" "}
+                {/* Updated exam name and dates */}
               </p>
               <p className="text-lg font-bold underline">Undertaking</p>
             </div>
@@ -793,12 +875,13 @@ function ViewPageContent() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the IAF Agniveer Vayu Examination (01/2025) held from 19th
-                Mar to 26th Mar 2025.
+                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
-                I will be there at from 19th Mar to 26th Mar 2025 and this is
-                final confirmation, and I will not refuse in any condition.
+                I will be there at from 12th June to 19th June 2025 and this is
+                final confirmation, and I will not refuse in any condition.{" "}
+                {/* Updated dates */}
               </p>
               <p className="font-bold mt-4">Penalty Clause:</p>
               <ol className="list-decimal list-inside mb-4 pl-4">
@@ -901,12 +984,13 @@ function ViewPageContent() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the IAF Agniveer Vayu Examination (01/2025) held from 19th
-                Mar to 26th Mar 2025.
+                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
-                I will be there at from 19th Mar to 26th Mar 2025 and this is
-                final confirmation, and I will not refuse in any condition.
+                I will be there at from 12th June to 19th June 2025 and this is
+                final confirmation, and I will not refuse in any condition.{" "}
+                {/* Updated dates */}
               </p>
               <p className="mt-2">
                 I will be agreeing to work as a Chief Invigilator on behalf of
@@ -972,8 +1056,8 @@ function ViewPageContent() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the IAF Agniveer Vayu Examination (01/2025) held from 19th
-                Mar to 26th Mar 2025.
+                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
                 I am interested to join a Certification Program i.e., Basic
@@ -983,9 +1067,9 @@ function ViewPageContent() {
               <p className="mt-2">
                 To Join this certification program, I am authorizing Netparam
                 Technologies Pvt Ltd to Debit a Sum of Rs. <strong>2000</strong>{" "}
-                from the total payout of IAF Agniveer Vayu 01/2025 prior and
-                after deducting this amount rest of amount will pay me through
-                Bank/ Cash.
+                from the total payout of ICG prior and after deducting this
+                amount rest of amount will pay me through Bank/ Cash.{" "}
+                {/* Updated exam name */}
               </p>
               <div className="flex justify-between mt-4">
                 <p>
@@ -1038,15 +1122,30 @@ function ViewPageContent() {
               </p>
             </div>
             <div className="text-sm">
-              <p>
+              <p className="text-sm">
                 I, <strong>{formData.name || "__________"}</strong> S/O{" "}
                 <strong>{formData.sonOf || "__________"}</strong> hereby declare
-                that I am not appearing in the IAF Agniveer Vayu Examination,
-                01/2025, Mar 2025 held from 19th Mar to 26th Mar 2025 as a
-                candidate either at the exam centre or have been deputed at any
-                other centre which is involved in the conduct of the exam. If I
-                am absent or leave the examination Centre at any time, in any
-                scenario on the abovementioned dates, or found doing any
+                that I am not appearing in the{" "}
+                <strong>{examData ? examData.examName : "__________"}</strong>{" "}
+                examination,{" "}
+                <strong>
+                  {formatHeldDateNumeric(
+                    examData ? examData.heldDate : "_________"
+                  )}
+                </strong>{" "}
+                <strong>{examData ? examData.heldDate : "__________"}</strong>,
+                held from{" "}
+                <strong>
+                  {formatDate(examData ? examData.startDate : "__________")}
+                </strong>{" "}
+                to{" "}
+                <strong>
+                  {formatDate(examData ? examData.endDate : "___________")}
+                </strong>{" "}
+                as a candidate either at the exam centre or have been deputed at
+                any other centre which is involved in the conduct of the exam.
+                If I am absent or leave the examination Centre at any time, in
+                any scenario on the above mentioned dates, or found doing any
                 Suspicious Activity / Malpractice / Unethical Behavior /
                 Professional Misconduct, then NetParam Technologies Pvt Ltd /
                 NETCOM/C-DAC/IAF has full authority to take any disciplinary

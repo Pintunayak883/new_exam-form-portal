@@ -4,6 +4,7 @@ import "./globals.css";
 import ReduxProvider from "@/providers/ReduxProvider";
 import ClientLayoutShell from "./ClientLayoutShell";
 import AuthInitializer from "@/AuthInitializer";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,6 +36,7 @@ export default function RootLayout({
           <AuthInitializer />
           <ClientLayoutShell>{children}</ClientLayoutShell>
         </ReduxProvider>
+        <Toaster richColors position="top-right" />
       </body>
     </html>
   );
