@@ -22,7 +22,6 @@ export const ourFileRouter = {
     .onUploadComplete(async ({ metadata, file }) => {
       console.log("Upload complete for userId:", metadata.userId);
       console.log("file url", file.url);
-      // यहाँ आप file.url को अपने डेटाबेस में सेव कर सकते हैं
     }),
 } satisfies FileRouter;
 

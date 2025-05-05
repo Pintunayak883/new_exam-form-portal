@@ -741,9 +741,9 @@ export default function ApplyPage() {
                           <SelectValue placeholder="Select your role" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="CIA1">CIA1</SelectItem>
-                          <SelectItem value="CIA2">CIA2</SelectItem>
-                          <SelectItem value="CIA3">CIA3</SelectItem>
+                          <SelectItem value="CIA1">CI-1</SelectItem>
+                          <SelectItem value="CIA2">CI-2</SelectItem>
+                          <SelectItem value="CIA3">CI-3</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

@@ -4,13 +4,13 @@ import jwt from "jsonwebtoken";
 import { connectToDatabase } from "@/lib/mongodb";
 import User, { IUser } from "@/models/User";
 
-// Response type interface
+// Interface for response structure
 interface ResponseData {
   message: string;
   error?: string;
 }
 
-// User data interface
+// Interface for user data
 interface UserData {
   name: string;
   password: string;
@@ -47,15 +47,15 @@ interface UserData {
   status?: string;
 }
 
-// Utility function to validate required fields
+// Helper function to check required fields
 const validateUserData = (data: UserData): string | null => {
   if (!data.name || !data.email || !data.password) {
-    return "Name, email, and password are required";
+    return "Name, email, and password are required.";
   }
   return null;
 };
 
-// Utility function to extract email from JWT token
+// Helper to decode email from JWT token
 const getEmailFromToken = (token: string): string | null => {
   try {
     const decodedToken = jwt.verify(
@@ -68,36 +68,30 @@ const getEmailFromToken = (token: string): string | null => {
   }
 };
 
-// Type-safe POST request handler for creating a new user
+// POST handler to create a new user
 export async function POST(req: Request): Promise<NextResponse> {
   try {
-    // Parse the request body
     const body: UserData = await req.json();
 
-    // Validate required fields
     const validationError = validateUserData(body);
     if (validationError) {
       return NextResponse.json({ message: validationError }, { status: 400 });
     }
 
-    // Connect to the database
     await connectToDatabase();
 
-    // Check if user already exists
     const existingUser: IUser | null = await User.findOne({
       email: body.email,
     });
     if (existingUser) {
       return NextResponse.json(
-        { message: "User already exists" },
+        { message: "A user with this email already exists." },
         { status: 400 }
       );
     }
 
-    // Hash the password
     const hashedPassword: string = await bcrypt.hash(body.password, 6);
 
-    // Create new user with all fields from body
     const newUser = new User({
       name: body.name,
       email: body.email,
@@ -133,37 +127,31 @@ export async function POST(req: Request): Promise<NextResponse> {
       resident: body.resident || "",
     });
 
-    // Save the new user
     await newUser.save();
 
-    // Return success response
     return NextResponse.json(
-      { message: "User created successfully" },
+      { message: "User account created successfully." },
       { status: 201 }
     );
   } catch (error: any) {
-    // Handle any errors and return a server error response
     return NextResponse.json(
-      { message: "Server error", error: error.message },
+      { message: "Something went wrong on the server.", error: error.message },
       { status: 500 }
     );
   }
 }
 
-// Type-safe PUT request handler for updating user details
+// PUT handler to update existing user data
 export async function PUT(req: Request): Promise<NextResponse> {
   try {
-    // Parse the request body
     const body: UserData = await req.json();
 
-    // Connect to the database
     await connectToDatabase();
 
-    // Get the logged-in user's email from JWT token
     const token = req.headers.get("authorization")?.split(" ")[1];
     if (!token) {
       return NextResponse.json(
-        { message: "Authorization token missing" },
+        { message: "Authorization token is missing." },
         { status: 401 }
       );
     }
@@ -171,66 +159,57 @@ export async function PUT(req: Request): Promise<NextResponse> {
     const email = getEmailFromToken(token);
     if (!email) {
       return NextResponse.json(
-        { message: "Invalid or expired token" },
+        { message: "Invalid or expired authorization token." },
         { status: 401 }
       );
     }
 
-    // Check if the user exists
     const existingUser: IUser | null = await User.findOne({ email });
     if (!existingUser) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
+      return NextResponse.json({ message: "User not found." }, { status: 404 });
     }
 
-    // Create an object to store fields to update
     const updateFields: Partial<UserData> = {};
 
-    // Dynamically add fields to updateFields if they exist in the request body
     for (const [key, value] of Object.entries(body)) {
       if (value !== undefined) {
         updateFields[key as keyof UserData] = value;
       }
     }
 
-    // Optionally validate new fields (e.g., currentDate format)
     if (updateFields.currentDate) {
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
       if (!dateRegex.test(updateFields.currentDate)) {
         return NextResponse.json(
-          { message: "Invalid currentDate format (use YYYY-MM-DD)" },
+          { message: "Invalid date format. Use YYYY-MM-DD." },
           { status: 400 }
         );
       }
     }
 
-    // Update user data in the database
     await User.updateOne({ email }, { $set: updateFields });
 
-    // Return success response
     return NextResponse.json(
-      { message: "User updated successfully" },
+      { message: "User information updated successfully." },
       { status: 200 }
     );
   } catch (error: any) {
-    // Handle any errors and return a server error response
     return NextResponse.json(
-      { message: "Server error", error: error.message },
+      { message: "Internal server error.", error: error.message },
       { status: 500 }
     );
   }
 }
 
-// Type-safe GET request handler for fetching user data
+// GET handler to fetch logged-in user's data
 export async function GET(req: Request): Promise<NextResponse> {
   try {
-    // Connect to the database
     await connectToDatabase();
 
-    // Get the logged-in user's email from JWT token
     const token = req.headers.get("authorization")?.split(" ")[1];
     if (!token) {
       return NextResponse.json(
-        { message: "Token nahi mila, login kar ke aaja!" },
+        { message: "Authorization token is required." },
         { status: 401 }
       );
     }
@@ -238,29 +217,23 @@ export async function GET(req: Request): Promise<NextResponse> {
     const email = getEmailFromToken(token);
     if (!email) {
       return NextResponse.json(
-        { message: "Token galat hai, dobara try kar!" },
+        { message: "Invalid or expired token." },
         { status: 401 }
       );
     }
 
-    // Fetch user data with selected fields using lean to avoid Document type
     const user = (await User.findOne({ email })
       .select("-password -__v")
-      .lean()) as IUser | null; // Yeh le, TypeScript ab chup ho gaya
+      .lean()) as IUser | null;
 
     if (!user) {
-      return NextResponse.json(
-        { message: "User nahi mila, kahaan chhup gaya?" },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "User not found." }, { status: 404 });
     }
 
-    // Return user data
     return NextResponse.json(user, { status: 200 });
   } catch (error: any) {
-    // Handle errors humbly
     return NextResponse.json(
-      { message: "Server ka mood kharab hai!", error: error.message },
+      { message: "Failed to fetch user data.", error: error.message },
       { status: 500 }
     );
   }
