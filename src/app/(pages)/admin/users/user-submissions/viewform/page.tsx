@@ -136,7 +136,7 @@ function ViewPageContent() {
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
-        format: "a4",
+        format: "letter",
       });
 
       const sections = pdfRef.current.querySelectorAll(".preview-section");
@@ -150,17 +150,19 @@ function ViewPageContent() {
         const section = sections[i] as HTMLElement;
         section.style.width = `${pageWidth}mm`;
         section.style.padding = `${margin}mm`;
+        section.style.paddingBottom = "20px";
         section.style.boxSizing = "border-box";
 
         const canvas = await html2canvas(section, {
-          scale: 2,
+          scale: 3,
           useCORS: true,
           logging: true,
+          scrollY: -window.scrollY,
           windowWidth: pageWidth * 3.78,
-          windowHeight: section.scrollHeight * 3,
+          windowHeight: section.scrollHeight + 100,
         });
 
-        const imgData = canvas.toDataURL("image/png");
+        const imgData = canvas.toDataURL("image/png", 1.0);
         const imgHeight = (canvas.height * contentWidth) / canvas.width;
 
         if (currentY + imgHeight > pageHeight - margin && currentY !== margin) {
@@ -178,6 +180,7 @@ function ViewPageContent() {
 
         section.style.width = "";
         section.style.padding = "";
+        section.style.paddingBottom = "";
       }
 
       pdf.save(`user-${formData?.name || "application"}-preview.pdf`);
@@ -281,12 +284,12 @@ function ViewPageContent() {
               "Download PDF"
             )}
           </Button>
-          <Button
+          {/* <Button
             onClick={() => window.print()}
             className="bg-yellow-600 text-white hover:bg-yellow-700"
           >
             Print Preview
-          </Button>
+          </Button> */}
           <Button
             onClick={() => router.push("/admin/candidates")}
             className="bg-gray-600 text-white hover:bg-gray-700"
@@ -346,18 +349,18 @@ function ViewPageContent() {
               <strong>{examData ? examData.examName : "__________"}</strong>{" "}
               examination,{" "}
               <strong>
-                {formatHeldDateNumeric(
-                  examData ? examData.heldDate : "___________"
-                )}
-              </strong>{" "}
-              <strong>{examData ? examData.heldDate : "__________"}</strong>,
+                {examData
+                  ? examData.examCount.toString().padStart(2, "0")
+                  : "___"}
+              </strong>
+              /<strong>{examData ? examData.heldDate : "__________"}</strong>,
               held from{" "}
               <strong>
                 {formatDate(examData ? examData.startDate : "___________")}
               </strong>{" "}
               to{" "}
               <strong>
-                {formatDate(examData ? examData.endDate : "__________")}
+                {formatDate(examData ? examData.endDate : "___________")}
               </strong>{" "}
               as a candidate either at the exam centre or have been deputed at
               any other centre which is involved in the conduct of the exam. If
@@ -480,8 +483,8 @@ function ViewPageContent() {
                 <strong>
                   {formData.previousCdaExperience || "__________"}
                 </strong>{" "}
-                & No. of Years{" "}
-                <strong>{formData.cdaExperienceYears || "__________"}</strong> &
+                | No. of Years{" "}
+                <strong>{formData.cdaExperienceYears || "__________"}</strong> |
                 Role-{" "}
                 <strong>{formData.cdaExperienceRole || "__________"}</strong>
               </p>
@@ -516,7 +519,14 @@ function ViewPageContent() {
                 STARPARTH TECHNOLOGIES PVT LTD
               </p>
               <p className="text-sm">
-                ICG (12th June to 19th June 2025){" "}
+                <strong>{examData ? examData.examName : "__________"}</strong>{" "}
+                <strong>
+                  {formatDate(examData ? examData.startDate : "___________")}
+                </strong>{" "}
+                to{" "}
+                <strong>
+                  {formatDate(examData ? examData.endDate : "___________")}
+                </strong>{" "}
                 {/* Updated exam name and dates */}
               </p>
               <p className="text-sm font-bold">Self-Declaration - COVID-19</p>
@@ -611,7 +621,14 @@ function ViewPageContent() {
                 STARPARTH TECHNOLOGIES PVT LTD
               </p>
               <p className="text-sm">
-                ICG (12th June to 19th June 2025){" "}
+                <strong>{examData ? examData.examName : "__________"}</strong>{" "}
+                <strong>
+                  {formatDate(examData ? examData.startDate : "___________")}
+                </strong>{" "}
+                to{" "}
+                <strong>
+                  {formatDate(examData ? examData.endDate : "___________")}
+                </strong>{" "}
                 {/* Updated exam name and dates */}
               </p>
               <p className="text-lg font-bold underline">Undertaking</p>
@@ -622,13 +639,29 @@ function ViewPageContent() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                for the{" "}
+                <strong>{examData ? examData.examName : "__________"}</strong>{" "}
+                Examination held from
+                <strong>
+                  {formatDate(examData ? examData.startDate : "___________")}
+                </strong>{" "}
+                to{" "}
+                <strong>
+                  {formatDate(examData ? examData.endDate : "___________")}
+                </strong>{" "}
                 {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
-                I will be there at from 12th June to 19th June 2025 and this is
-                final confirmation, and I will not refuse in any condition.{" "}
-                {/* Updated dates */}
+                I will be there at from{" "}
+                <strong>
+                  {formatDate(examData ? examData.startDate : "___________")}
+                </strong>{" "}
+                to{" "}
+                <strong>
+                  {formatDate(examData ? examData.endDate : "___________")}
+                </strong>{" "}
+                and this is final confirmation, and I will not refuse in any
+                condition. {/* Updated dates */}
               </p>
               <p className="font-bold mt-4">Penalty Clause:</p>
               <ol className="list-decimal list-inside mb-4 pl-4">
@@ -731,18 +764,34 @@ function ViewPageContent() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                for the{" "}
+                <strong>{examData ? examData.examName : "__________"}</strong>{" "}
+                Examination held from{" "}
+                <strong>
+                  {formatDate(examData ? examData.startDate : "___________")}
+                </strong>{" "}
+                to{" "}
+                <strong>
+                  {formatDate(examData ? examData.endDate : "___________")}
+                </strong>{" "}
                 {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
-                I will be there at from 12th June to 19th June 2025 and this is
-                final confirmation, and I will not refuse in any condition.{" "}
-                {/* Updated dates */}
+                I will be there at from{" "}
+                <strong>
+                  {formatDate(examData ? examData.startDate : "___________")}
+                </strong>{" "}
+                to{" "}
+                <strong>
+                  {formatDate(examData ? examData.endDate : "___________")}
+                </strong>{" "}
+                and this is final confirmation, and I will not refuse in any
+                condition. {/* Updated dates */}
               </p>
               <p className="mt-2">
                 I will be agreeing to work as a Chief Invigilator on behalf of
                 StarParth Technologies Pvt Ltd on the payout of Rs.{" "}
-                <strong>500/Day</strong> as a remuneration for the No. of days
+                <strong>___/Day</strong> as a remuneration for the No. of days
                 how I should be deployed on the centre according to allocation
                 on that particular centre.
               </p>
@@ -803,7 +852,15 @@ function ViewPageContent() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                for the {examData ? examData.examName : "_________"} Examination
+                held from{" "}
+                <strong>
+                  {formatDate(examData ? examData.startDate : "___________")}
+                </strong>{" "}
+                to{" "}
+                <strong>
+                  {formatDate(examData ? examData.endDate : "___________")}
+                </strong>{" "}
                 {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
@@ -814,9 +871,10 @@ function ViewPageContent() {
               <p className="mt-2">
                 To Join this certification program, I am authorizing StarParth
                 Technologies Pvt Ltd to Debit a Sum of Rs. <strong>2000</strong>{" "}
-                from the total payout of ICG prior and after deducting this
-                amount rest of amount will pay me through Bank/ Cash.{" "}
-                {/* Updated exam name */}
+                from the total payout of{" "}
+                {examData ? examData.examName : "_________"} prior and after
+                deducting this amount rest of amount will pay me through Bank/
+                Cash. {/* Updated exam name */}
               </p>
               <div className="flex justify-between mt-4">
                 <p>
@@ -864,7 +922,14 @@ function ViewPageContent() {
             <div className="text-center mb-4">
               <p className="text-xl font-bold">NETPARAM TECHNOLOGIES PVT LTD</p>
               <p className="text-sm">
-                ICG (12th June to 19th June 2025){" "}
+                <strong>{examData ? examData.examName : "__________"}</strong>{" "}
+                <strong>
+                  {formatDate(examData ? examData.startDate : "___________")}
+                </strong>{" "}
+                to{" "}
+                <strong>
+                  {formatDate(examData ? examData.endDate : "___________")}
+                </strong>{" "}
                 {/* Updated exam name and dates */}
               </p>
               <p className="text-lg font-bold underline">Undertaking</p>
@@ -875,13 +940,30 @@ function ViewPageContent() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                for the{" "}
+                <strong>{examData ? examData.examName : "__________"}</strong>{" "}
+                Examination held from{" "}
+                <strong>
+                  {formatDate(examData ? examData.startDate : "___________")}
+                </strong>{" "}
+                to{" "}
+                <strong>
+                  {formatDate(examData ? examData.endDate : "___________")}
+                </strong>{" "}
                 {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
-                I will be there at from 12th June to 19th June 2025 and this is
-                final confirmation, and I will not refuse in any condition.{" "}
-                {/* Updated dates */}
+                I will be there at from{" "}
+                <strong>{examData ? examData.examName : "__________"}</strong>{" "}
+                <strong>
+                  {formatDate(examData ? examData.startDate : "___________")}
+                </strong>{" "}
+                to{" "}
+                <strong>
+                  {formatDate(examData ? examData.endDate : "___________")}
+                </strong>{" "}
+                and this is final confirmation, and I will not refuse in any
+                condition. {/* Updated dates */}
               </p>
               <p className="font-bold mt-4">Penalty Clause:</p>
               <ol className="list-decimal list-inside mb-4 pl-4">
@@ -984,18 +1066,36 @@ function ViewPageContent() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                for the{" "}
+                <strong>{examData ? examData.examName : "__________"}</strong>{" "}
+                Examination held from{" "}
+                <strong>{examData ? examData.examName : "__________"}</strong>{" "}
+                <strong>
+                  {formatDate(examData ? examData.startDate : "___________")}
+                </strong>{" "}
+                to{" "}
+                <strong>
+                  {formatDate(examData ? examData.endDate : "___________")}
+                </strong>{" "}
                 {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
-                I will be there at from 12th June to 19th June 2025 and this is
-                final confirmation, and I will not refuse in any condition.{" "}
-                {/* Updated dates */}
+                I will be there at from{" "}
+                <strong>{examData ? examData.examName : "__________"}</strong>{" "}
+                <strong>
+                  {formatDate(examData ? examData.startDate : "___________")}
+                </strong>{" "}
+                to{" "}
+                <strong>
+                  {formatDate(examData ? examData.endDate : "___________")}
+                </strong>{" "}
+                and this is final confirmation, and I will not refuse in any
+                condition. {/* Updated dates */}
               </p>
               <p className="mt-2">
                 I will be agreeing to work as a Chief Invigilator on behalf of
                 Netparam Technologies Pvt Ltd on the payout of Rs.{" "}
-                <strong>500/Day</strong> as a remuneration for the No. of days
+                <strong>__/Day</strong> as a remuneration for the No. of days
                 how I should be deployed on the centre according to allocation
                 on that particular centre.
               </p>
@@ -1056,7 +1156,16 @@ function ViewPageContent() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                for the{" "}
+                <strong>{examData ? examData.examName : "__________"}</strong>{" "}
+                Examination held from{" "}
+                <strong>
+                  {formatDate(examData ? examData.startDate : "___________")}
+                </strong>{" "}
+                to{" "}
+                <strong>
+                  {formatDate(examData ? examData.endDate : "___________")}
+                </strong>{" "}
                 {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
@@ -1067,9 +1176,10 @@ function ViewPageContent() {
               <p className="mt-2">
                 To Join this certification program, I am authorizing Netparam
                 Technologies Pvt Ltd to Debit a Sum of Rs. <strong>2000</strong>{" "}
-                from the total payout of ICG prior and after deducting this
-                amount rest of amount will pay me through Bank/ Cash.{" "}
-                {/* Updated exam name */}
+                from the total payout of{" "}
+                <strong>{examData ? examData.examName : "__________"}</strong>{" "}
+                prior and after deducting this amount rest of amount will pay me
+                through Bank/ Cash. {/* Updated exam name */}
               </p>
               <div className="flex justify-between mt-4">
                 <p>
@@ -1122,21 +1232,17 @@ function ViewPageContent() {
               </p>
             </div>
             <div className="text-sm">
-              <p className="text-sm">
+              <p className="text-sm mb-4">
                 I, <strong>{formData.name || "__________"}</strong> S/O{" "}
                 <strong>{formData.sonOf || "__________"}</strong> hereby declare
                 that I am not appearing in the{" "}
                 <strong>{examData ? examData.examName : "__________"}</strong>{" "}
                 examination,{" "}
-                <strong>
-                  {formatHeldDateNumeric(
-                    examData ? examData.heldDate : "_________"
-                  )}
-                </strong>{" "}
+                <strong>{examData ? examData.examCount : "________"}</strong>{" "}
                 <strong>{examData ? examData.heldDate : "__________"}</strong>,
                 held from{" "}
                 <strong>
-                  {formatDate(examData ? examData.startDate : "__________")}
+                  {formatDate(examData ? examData.startDate : "___________")}
                 </strong>{" "}
                 to{" "}
                 <strong>
@@ -1266,8 +1372,8 @@ function ViewPageContent() {
                 <strong>
                   {formData.previousCdaExperience || "__________"}
                 </strong>{" "}
-                & No. of Years{" "}
-                <strong>{formData.cdaExperienceYears || "__________"}</strong> &
+                | No. of Years{" "}
+                <strong>{formData.cdaExperienceYears || "__________"}</strong> |
                 Role-{" "}
                 <strong>{formData.cdaExperienceRole || "__________"}</strong>
               </p>

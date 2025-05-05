@@ -152,12 +152,12 @@ export default function PreviewPage() {
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
-        format: "a4",
+        format: "legal",
       });
 
       const sections = pdfRef.current.querySelectorAll(".preview-section");
-      const pageWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
+      const pageWidth = 215.9; // A4 width in mm
+      const pageHeight = 355.6; // A4 height in mm
       const margin = 10; // Margin in mm
       const contentWidth = pageWidth - 2 * margin;
       let currentY = margin; // Track vertical position on the page
@@ -318,8 +318,12 @@ export default function PreviewPage() {
               <strong>{formData.sonOf || "__________"}</strong> hereby declare
               that I am not appearing in the{" "}
               <strong>{examData.examName || "__________"}</strong> examination,{" "}
-              <strong>{formatHeldDateNumeric(examData.heldDate)}</strong>{" "}
-              <strong>{examData.heldDate || "__________"}</strong>, held from{" "}
+              <strong>
+                {examData.examCount
+                  ? examData.examCount.toString().padStart(2, "0")
+                  : "___"}
+              </strong>
+              /<strong>{examData.heldDate || "__________"}</strong>, held from{" "}
               <strong>{formatDate(examData.startDate)}</strong> to{" "}
               <strong>{formatDate(examData.endDate)}</strong> as a candidate
               either at the exam centre or have been deputed at any other centre
@@ -442,8 +446,8 @@ export default function PreviewPage() {
                 <strong>
                   {formData.previousCdaExperience || "__________"}
                 </strong>{" "}
-                & No. of Years{" "}
-                <strong>{formData.cdaExperienceYears || "__________"}</strong> &
+                | No. of Years{" "}
+                <strong>{formData.cdaExperienceYears || "__________"}</strong> |
                 Role-{" "}
                 <strong>{formData.cdaExperienceRole || "__________"}</strong>
               </p>
@@ -478,7 +482,9 @@ export default function PreviewPage() {
                 STARPARTH TECHNOLOGIES PVT LTD
               </p>
               <p className="text-sm">
-                ICG (12th June to 19th June 2025){" "}
+                <strong>{examData.examName || "__________"}</strong>{" "}
+                <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong>{" "}
                 {/* Updated exam name and dates */}
               </p>
               <p className="text-sm font-bold">Self-Declaration - COVID-19</p>
@@ -573,7 +579,9 @@ export default function PreviewPage() {
                 STARPARTH TECHNOLOGIES PVT LTD
               </p>
               <p className="text-sm">
-                ICG (12th June to 19th June 2025){" "}
+                <strong>{examData.examName || "__________"}</strong>{" "}
+                <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong>{" "}
                 {/* Updated exam name and dates */}
               </p>
               <p className="text-lg font-bold underline">Undertaking</p>
@@ -584,11 +592,16 @@ export default function PreviewPage() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                for the <strong>{examData.examName || "__________"}</strong>{" "}
+                Examination held from
+                <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong>{" "}
                 {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
-                I will be there at from 12th June to 19th June 2025 and this is
+                I will be there at from
+                <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong> and this is
                 final confirmation, and I will not refuse in any condition.{" "}
                 {/* Updated dates */}
               </p>
@@ -693,18 +706,23 @@ export default function PreviewPage() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                for the <strong>{examData.examName || "__________"}</strong>{" "}
+                Examination held from
+                <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong>{" "}
                 {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
-                I will be there at from 12th June to 19th June 2025 and this is
+                I will be there at from{" "}
+                <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong> and this is
                 final confirmation, and I will not refuse in any condition.{" "}
                 {/* Updated dates */}
               </p>
               <p className="mt-2">
                 I will be agreeing to work as a Chief Invigilator on behalf of
                 StarParth Technologies Pvt Ltd on the payout of Rs.{" "}
-                <strong>500/Day</strong> as a remuneration for the No. of days
+                <strong>___/Day</strong> as a remuneration for the No. of days
                 how I should be deployed on the centre according to allocation
                 on that particular centre.
               </p>
@@ -765,7 +783,9 @@ export default function PreviewPage() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                for the ICG Examination held from{" "}
+                <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong>{" "}
                 {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
@@ -826,7 +846,9 @@ export default function PreviewPage() {
             <div className="text-center mb-4">
               <p className="text-xl font-bold">NETPARAM TECHNOLOGIES PVT LTD</p>
               <p className="text-sm">
-                ICG (12th June to 19th June 2025){" "}
+                <strong>{examData.examName || "__________"}</strong>{" "}
+                <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong>{" "}
                 {/* Updated exam name and dates */}
               </p>
               <p className="text-lg font-bold underline">Undertaking</p>
@@ -837,11 +859,17 @@ export default function PreviewPage() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                for the <strong>{examData.examName || "__________"}</strong>{" "}
+                Examination held from{" "}
+                <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong>{" "}
                 {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
-                I will be there at from 12th June to 19th June 2025 and this is
+                I will be there at from{" "}
+                <strong>{examData.examName || "__________"}</strong>{" "}
+                <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong> and this is
                 final confirmation, and I will not refuse in any condition.{" "}
                 {/* Updated dates */}
               </p>
@@ -946,18 +974,25 @@ export default function PreviewPage() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                for the <strong>{examData.examName || "__________"}</strong>{" "}
+                Examination held from{" "}
+                <strong>{examData.examName || "__________"}</strong>{" "}
+                <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong>{" "}
                 {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
-                I will be there at from 12th June to 19th June 2025 and this is
+                I will be there at from{" "}
+                <strong>{examData.examName || "__________"}</strong>{" "}
+                <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong> and this is
                 final confirmation, and I will not refuse in any condition.{" "}
                 {/* Updated dates */}
               </p>
               <p className="mt-2">
                 I will be agreeing to work as a Chief Invigilator on behalf of
                 Netparam Technologies Pvt Ltd on the payout of Rs.{" "}
-                <strong>500/Day</strong> as a remuneration for the No. of days
+                <strong>__/Day</strong> as a remuneration for the No. of days
                 how I should be deployed on the centre according to allocation
                 on that particular centre.
               </p>
@@ -1018,7 +1053,10 @@ export default function PreviewPage() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the ICG Examination held from 12th June to 19th June 2025.{" "}
+                for the <strong>{examData.examName || "__________"}</strong>{" "}
+                Examination held from{" "}
+                <strong>{formatDate(examData.startDate)}</strong> to{" "}
+                <strong>{formatDate(examData.endDate)}</strong>
                 {/* Updated exam name and dates */}
               </p>
               <p className="mt-2">
@@ -1029,9 +1067,10 @@ export default function PreviewPage() {
               <p className="mt-2">
                 To Join this certification program, I am authorizing Netparam
                 Technologies Pvt Ltd to Debit a Sum of Rs. <strong>2000</strong>{" "}
-                from the total payout of ICG prior and after deducting this
-                amount rest of amount will pay me through Bank/ Cash.{" "}
-                {/* Updated exam name */}
+                from the total payout of{" "}
+                <strong>{examData.examName || "__________"}</strong> prior and
+                after deducting this amount rest of amount will pay me through
+                Bank/ Cash. {/* Updated exam name */}
               </p>
               <div className="flex justify-between mt-4">
                 <p>
@@ -1084,7 +1123,7 @@ export default function PreviewPage() {
               </p>
             </div>
             <div className="text-sm">
-              <p className="text-sm">
+              <p className="text-sm mb-4">
                 I, <strong>{formData.name || "__________"}</strong> S/O{" "}
                 <strong>{formData.sonOf || "__________"}</strong> hereby declare
                 that I am not appearing in the{" "}
@@ -1218,8 +1257,8 @@ export default function PreviewPage() {
                 <strong>
                   {formData.previousCdaExperience || "__________"}
                 </strong>{" "}
-                & No. of Years{" "}
-                <strong>{formData.cdaExperienceYears || "__________"}</strong> &
+                | No. of Years{" "}
+                <strong>{formData.cdaExperienceYears || "__________"}</strong> |
                 Role-{" "}
                 <strong>{formData.cdaExperienceRole || "__________"}</strong>
               </p>
