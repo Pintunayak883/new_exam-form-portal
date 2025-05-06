@@ -592,7 +592,7 @@ export default function PreviewPage() {
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
                 for the <strong>{examData.examName || "__________"}</strong>{" "}
-                Examination held from
+                Examination held from{" "}
                 <strong>{formatDate(examData.startDate)}</strong> to{" "}
                 <strong>{formatDate(examData.endDate)}</strong>{" "}
                 {/* Updated exam name and dates */}

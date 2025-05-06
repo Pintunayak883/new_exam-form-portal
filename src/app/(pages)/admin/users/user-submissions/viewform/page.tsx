@@ -639,7 +639,7 @@ function ViewPageContent() {
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
                 for the{" "}
                 <strong>{examData ? examData.examName : "__________"}</strong>{" "}
-                Examination held from
+                Examination held from{" "}
                 <strong>
                   {formatDate(examData ? examData.startDate : "___________")}
                 </strong>{" "}
