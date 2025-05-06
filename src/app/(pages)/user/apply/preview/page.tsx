@@ -782,7 +782,7 @@ export default function PreviewPage() {
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
                 <strong>{formData.resident || "__________"}</strong> Aadhaar No.{" "}
                 <strong>{formData.aadhaarNo || "__________"}</strong> is working
-                for the ICG Examination held from{" "}
+                for the {examData.examName || "____"} Examination held from{" "}
                 <strong>{formatDate(examData.startDate)}</strong> to{" "}
                 <strong>{formatDate(examData.endDate)}</strong>{" "}
                 {/* Updated exam name and dates */}
@@ -795,9 +795,9 @@ export default function PreviewPage() {
               <p className="mt-2">
                 To Join this certification program, I am authorizing StarParth
                 Technologies Pvt Ltd to Debit a Sum of Rs. <strong>2000</strong>{" "}
-                from the total payout of ICG prior and after deducting this
-                amount rest of amount will pay me through Bank/ Cash.{" "}
-                {/* Updated exam name */}
+                from the total payout of {examData.examName || "____"} prior and
+                after deducting this amount rest of amount will pay me through
+                Bank/ Cash. {/* Updated exam name */}
               </p>
               <div className="flex justify-between mt-4">
                 <p>
