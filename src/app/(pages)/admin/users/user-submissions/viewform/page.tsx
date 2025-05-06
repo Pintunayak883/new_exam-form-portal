@@ -347,7 +347,7 @@ function ViewPageContent() {
               <strong>{formData.sonOf || "__________"}</strong> hereby declare
               that I am not appearing in the{" "}
               <strong>{examData ? examData.examName : "__________"}</strong>{" "}
-              examination,{" "}
+              Examination,{" "}
               <strong>
                 {examData
                   ? examData.examCount.toString().padStart(2, "0")
@@ -368,9 +368,9 @@ function ViewPageContent() {
               scenario on the above mentioned dates, or found doing any
               Suspicious Activity / Malpractice / Unethical Behavior /
               Professional Misconduct, then NetParam Technologies Pvt Ltd /
-              NETCOM/C-DAC/IAF has full authority to take any disciplinary
-              action (regarding Duty Code of Conduct, as specified in IPC
-              Section).
+              NETCOM/C-DAC/{examData ? examData.examName : "__________"} has
+              full authority to take any disciplinary action (regarding Duty
+              Code of Conduct, as specified in IPC Section).
             </p>
             <p className="text-sm mb-2">
               As a condition of serving as an Operations Chief Invigilator of
@@ -443,9 +443,7 @@ function ViewPageContent() {
                 </p>
               </div>
               <div className="flex flex-col items-center">
-                <p className="mb-2">
-                  Paste Your Recent Passport Size Photo here
-                </p>
+                <p className="mb-2">Passport Size Photo</p>
                 {formData.photo ? (
                   <div className="w-24 h-32 border-2 border-black mb-4">
                     <img
@@ -1237,8 +1235,14 @@ function ViewPageContent() {
                 <strong>{formData.sonOf || "__________"}</strong> hereby declare
                 that I am not appearing in the{" "}
                 <strong>{examData ? examData.examName : "__________"}</strong>{" "}
-                examination,{" "}
-                <strong>{examData ? examData.examCount : "________"}</strong>{" "}
+                Examination,{" "}
+                <strong>
+                  {" "}
+                  {examData
+                    ? examData.examCount.toString().padStart(2, "0")
+                    : "___"}
+                  /
+                </strong>{" "}
                 <strong>{examData ? examData.heldDate : "__________"}</strong>,
                 held from{" "}
                 <strong>
@@ -1254,9 +1258,9 @@ function ViewPageContent() {
                 any scenario on the above mentioned dates, or found doing any
                 Suspicious Activity / Malpractice / Unethical Behavior /
                 Professional Misconduct, then NetParam Technologies Pvt Ltd /
-                NETCOM/C-DAC/IAF has full authority to take any disciplinary
-                action (regarding Duty Code of Conduct, as specified in IPC
-                Section).
+                NETCOM/C-DAC/{examData ? examData.examName : "__________"} has
+                full authority to take any disciplinary action (regarding Duty
+                Code of Conduct, as specified in IPC Section).
               </p>
               <p className="mt-2">
                 As a condition of serving as an Operations Chief Invigilator of
@@ -1333,9 +1337,7 @@ function ViewPageContent() {
                   </p>
                 </div>
                 <div className="flex flex-col items-center">
-                  <p className="mb-2">
-                    Paste Your Recent Passport Size Photo here
-                  </p>
+                  <p className="mb-2">Passport Size Photo</p>
                   {formData.photo ? (
                     <div className="w-24 h-32 border-2 border-black mb-4">
                       <img

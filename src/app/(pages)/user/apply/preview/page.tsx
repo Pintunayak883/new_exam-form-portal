@@ -317,7 +317,7 @@ export default function PreviewPage() {
               I, <strong>{formData.name || "__________"}</strong> S/O{" "}
               <strong>{formData.sonOf || "__________"}</strong> hereby declare
               that I am not appearing in the{" "}
-              <strong>{examData.examName || "__________"}</strong> examination,{" "}
+              <strong>{examData.examName || "__________"}</strong> Examination,{" "}
               <strong>
                 {examData.examCount
                   ? examData.examCount.toString().padStart(2, "0")
@@ -331,9 +331,10 @@ export default function PreviewPage() {
               leave the examination Centre at any time, in any scenario on the
               above mentioned dates, or found doing any Suspicious Activity /
               Malpractice / Unethical Behavior / Professional Misconduct, then
-              NetParam Technologies Pvt Ltd / NETCOM/C-DAC/IAF has full
-              authority to take any disciplinary action (regarding Duty Code of
-              Conduct, as specified in IPC Section).
+              NetParam Technologies Pvt Ltd / NETCOM/C-DAC/
+              {examData.examName || "__________"} has full authority to take any
+              disciplinary action (regarding Duty Code of Conduct, as specified
+              in IPC Section).
             </p>
             <p className="text-sm mb-2">
               As a condition of serving as an Operations Chief Invigilator of
@@ -406,9 +407,7 @@ export default function PreviewPage() {
                 </p>
               </div>
               <div className="flex flex-col items-center">
-                <p className="mb-2">
-                  Paste Your Recent Passport Size Photo here
-                </p>
+                <p className="mb-2">Passport Size Photo</p>
                 {formData.photo ? (
                   <div className="w-24 h-32 border-2 border-black mb-4">
                     <img
@@ -1128,8 +1127,13 @@ export default function PreviewPage() {
                 <strong>{formData.sonOf || "__________"}</strong> hereby declare
                 that I am not appearing in the{" "}
                 <strong>{examData.examName || "__________"}</strong>{" "}
-                examination,{" "}
-                <strong>{formatHeldDateNumeric(examData.heldDate)}</strong>{" "}
+                Examination,{" "}
+                <strong>
+                  {" "}
+                  {examData.examCount
+                    ? examData.examCount.toString().padStart(2, "0")
+                    : "___"}
+                </strong>{" "}
                 <strong>{examData.heldDate || "__________"}</strong>, held from{" "}
                 <strong>{formatDate(examData.startDate)}</strong> to{" "}
                 <strong>{formatDate(examData.endDate)}</strong> as a candidate
@@ -1139,9 +1143,9 @@ export default function PreviewPage() {
                 scenario on the above mentioned dates, or found doing any
                 Suspicious Activity / Malpractice / Unethical Behavior /
                 Professional Misconduct, then NetParam Technologies Pvt Ltd /
-                NETCOM/C-DAC/IAF has full authority to take any disciplinary
-                action (regarding Duty Code of Conduct, as specified in IPC
-                Section).
+                NETCOM/C-DAC/{examData.examName || "__________"} has full
+                authority to take any disciplinary action (regarding Duty Code
+                of Conduct, as specified in IPC Section).
               </p>
               <p className="mt-2">
                 As a condition of serving as an Operations Chief Invigilator of
@@ -1218,9 +1222,7 @@ export default function PreviewPage() {
                   </p>
                 </div>
                 <div className="flex flex-col items-center">
-                  <p className="mb-2">
-                    Paste Your Recent Passport Size Photo here
-                  </p>
+                  <p className="mb-2">Passport Size Photo</p>
                   {formData.photo ? (
                     <div className="w-24 h-32 border-2 border-black mb-4">
                       <img
